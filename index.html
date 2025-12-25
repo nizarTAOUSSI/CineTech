@@ -48,6 +48,11 @@
                     <i class="fas fa-user-tie w-6"></i>
                     <span>Réalisateurs</span>
                 </a>
+
+                <a href="#" id="nav-catalog" class="nav-link flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-th w-6"></i>
+                    <span>Catalogue Films</span>
+                </a>
             </nav>
 
             <div class="p-4 border-t border-slate-700">
@@ -164,6 +169,21 @@
                                 La liste est vide.
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <section id="section-catalog" class="page-section hidden">
+                    <div class="mb-6">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                            <h3 class="text-2xl font-bold text-gray-800">Catalogue de Films</h3>
+                            <div class="flex gap-2">
+                                <input type="text" id="catalog-search" placeholder="Rechercher..." class="border rounded px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        <div id="catalog-genre-filters" class="flex gap-2 flex-wrap mb-4"></div>
+                    </div>
+                    
+                    <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     </div>
                 </section>
 

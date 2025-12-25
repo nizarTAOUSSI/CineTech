@@ -5,10 +5,73 @@ window.addEventListener('error', function(e){
 let directors = JSON.parse(localStorage.getItem('cinetech_directors')) || [
     { id: 1, name: "Christopher Nolan" }, { id: 2, name: "Quentin Tarantino" }
 ];
-let films = JSON.parse(localStorage.getItem('cinetech_films')) || [
-    { id: 1, title: "Inception", directorId: 1, year: 2010, genre: "Sci-Fi", rating: 8.8, isFavorite: true },
-    { id: 2, title: "Pulp Fiction", directorId: 2, year: 1994, genre: "Policier", rating: 8.9, isFavorite: false }
-];
+let films = JSON.parse(localStorage.getItem('cinetech_films')) || [];
+let apiFilmsLoaded = false;
+
+const genreMap = {
+    28: "Action",
+    12: "Aventure",
+    16: "Animation",
+    35: "Comédie",
+    80: "Policier",
+    99: "Documentaire",
+    18: "Drame",
+    10751: "Familial",
+    14: "Fantastique",
+    36: "Histoire",
+    27: "Horreur",
+    10402: "Musique",
+    9648: "Mystère",
+    10749: "Romance",
+    878: "Science-Fiction",
+    10770: "Téléfilm",
+    53: "Thriller",
+    10752: "Guerre",
+    37: "Western"
+};
+
+async function fetchFilmsFromAPI() {
+    try {
+        const response = await fetch('https://jsonfakery.com/movies/paginated');
+        const data = await response.json();
+        
+        if (data && data.data && Array.isArray(data.data)) {
+            const apiFilms = data.data.map((movie, index) => {
+                const genreId = movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids[0] : null;
+                const genre = genreId ? (genreMap[genreId] || "Autre") : "Autre";
+                
+                const year = movie.release_date ? new Date(movie.release_date).getFullYear() : 2020;
+                
+                let directorId = directors[0]?.id || 1;
+                
+                return {
+                    id: movie.movie_id || movie.id || Date.now() + index,
+                    title: movie.original_title || movie.title || "Sans titre",
+                    directorId: directorId,
+                    year: year,
+                    genre: genre,
+                    rating: movie.vote_average || 0,
+                    poster: movie.poster_path || '',
+                    isFavorite: false
+                };
+            });
+            
+            films = apiFilms;
+            apiFilmsLoaded = true;
+            saveData();
+            console.log(`Loaded ${films.length} films from API`);
+        }
+    } catch (error) {
+        console.error('Error fetching films from API:', error);
+        if (films.length === 0) {
+            films = [
+                { id: 1, title: "Inception", directorId: 1, year: 2010, genre: "Sci-Fi", rating: 8.8, isFavorite: true },
+                { id: 2, title: "Pulp Fiction", directorId: 2, year: 1994, genre: "Policier", rating: 8.9, isFavorite: false }
+            ];
+            saveData();
+        }
+    }
+}
 
 function saveData() {
     localStorage.setItem('cinetech_directors', JSON.stringify(directors));
@@ -19,7 +82,7 @@ function saveData() {
 function navigateTo(id) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
     document.getElementById(`section-${id}`).classList.remove('hidden');
-    ['nav-dashboard','nav-films','nav-favs','nav-directors'].forEach(nid => {
+    ['nav-dashboard','nav-films','nav-favs','nav-directors','nav-catalog'].forEach(nid => {
         const el = document.getElementById(nid);
         if(!el) return;
         el.classList.remove('bg-blue-600','text-white');
@@ -29,10 +92,11 @@ function navigateTo(id) {
     const activeNav = document.getElementById(navId);
     if(activeNav) { activeNav.classList.remove('text-slate-300'); activeNav.classList.add('bg-blue-600','text-white'); }
 
-    document.getElementById('page-title').innerText = id === 'films' ? "Gestion de Films" : id === 'directors' ? "Réalisateurs" : id === 'favorites' ? "Favoris" : "Dashboard";
+    document.getElementById('page-title').innerText = id === 'films' ? "Gestion de Films" : id === 'directors' ? "Réalisateurs" : id === 'favorites' ? "Favoris" : id === 'catalog' ? "Catalogue Films" : "Dashboard";
     if(id === 'films') renderFilmsTable();
     if(id === 'directors') renderDirectorsList();
     if(id === 'favorites') renderFavorites();
+    if(id === 'catalog') renderCatalog();
 }
 
 function setupEventListeners() {
@@ -40,11 +104,13 @@ function setupEventListeners() {
     const navFilms = document.getElementById('nav-films');
     const navDirectors = document.getElementById('nav-directors');
     const navFavs = document.getElementById('nav-favs');
+    const navCatalog = document.getElementById('nav-catalog');
     
     if(navDashboard) navDashboard.onclick = () => navigateTo('dashboard');
     if(navFilms) navFilms.onclick = () => navigateTo('films');
     if(navDirectors) navDirectors.onclick = () => navigateTo('directors');
     if(navFavs) navFavs.onclick = () => navigateTo('favorites');
+    if(navCatalog) navCatalog.onclick = () => navigateTo('catalog');
 }
 
 const genreColors = {
@@ -330,6 +396,106 @@ function setupFormListeners() {
     if(searchInput) {
         searchInput.oninput = renderFilmsTable;
     }
+    
+    const catalogSearch = document.getElementById('catalog-search');
+    if(catalogSearch) {
+        catalogSearch.oninput = renderCatalog;
+    }
+}
+
+function renderCatalog() {
+    renderCatalogGenreFilters();
+    const container = document.getElementById('catalog-grid');
+    const search = document.getElementById('catalog-search').value.toLowerCase();
+    const selectedGenre = document.getElementById('catalog-selectedGenre')?.value || '';
+    container.innerHTML = '';
+
+    let filtered = films.filter(f => {
+        const matchSearch = f.title.toLowerCase().includes(search) || f.genre.toLowerCase().includes(search);
+        const matchGenre = !selectedGenre || f.genre === selectedGenre;
+        return matchSearch && matchGenre;
+    });
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full p-8 text-center text-gray-400">Aucun film trouvé</div>`;
+        return;
+    }
+
+    filtered.forEach(film => {
+        const d = directors.find(x => x.id == film.directorId)?.name || "Inconnu";
+        const stars = Math.round((film.rating || 0) / 2);
+        let starHTML = '';
+        for(let i=1; i<=5; i++) starHTML += `<i class="${i<=stars?'fas':'far'} fa-star text-yellow-400 text-xs"></i>`;
+        
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer";
+        card.onclick = () => {
+            navigateTo('films');
+            setTimeout(() => {
+                document.getElementById('search-film').value = film.title;
+                renderFilmsTable();
+            }, 100);
+        };
+        
+        const posterUrl = film.poster || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400';
+        
+        card.innerHTML = `
+            <div class="relative aspect-[2/3] bg-gray-200">
+                <img src="${posterUrl}" alt="${film.title}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400'">
+                <div class="absolute top-2 right-2">
+                    <button onclick="event.stopPropagation(); toggleFavorite(${film.id})" class="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition">
+                        <i class="${film.isFavorite?'fas':'far'} fa-heart ${film.isFavorite?'text-red-500':'text-gray-400'} text-lg"></i>
+                    </button>
+                </div>
+                <div class="absolute bottom-2 left-2">
+                    <span class="${getGenreColor(film.genre)} text-white text-xs font-bold px-2 py-1 rounded-full">${film.genre}</span>
+                </div>
+            </div>
+            <div class="p-3">
+                <h3 class="font-bold text-sm text-gray-800 mb-1 truncate" title="${film.title}">${film.title}</h3>
+                <p class="text-xs text-gray-500 mb-2">${d} • ${film.year}</p>
+                <div class="flex items-center justify-between">
+                    <div class="flex gap-0.5">${starHTML}</div>
+                    <span class="text-xs font-bold text-gray-700">${(film.rating || 0).toFixed(1)}</span>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderCatalogGenreFilters() {
+    const container = document.getElementById('catalog-genre-filters');
+    container.innerHTML = '';
+    
+    // Add hidden input for selected genre
+    let selectedInput = document.getElementById('catalog-selectedGenre');
+    if (!selectedInput) {
+        selectedInput = document.createElement('input');
+        selectedInput.type = 'hidden';
+        selectedInput.id = 'catalog-selectedGenre';
+        selectedInput.value = '';
+        container.appendChild(selectedInput);
+    }
+    
+    const genres = [...new Set(films.map(f => f.genre))].sort();
+    const selectedGenre = selectedInput.value;
+    
+    const allBtn = document.createElement('button');
+    allBtn.className = `px-4 py-2 rounded-full font-bold text-sm transition-all ${!selectedGenre ? 'bg-blue-600 text-white' : 'border border-gray-300 text-gray-600 hover:bg-gray-100'}`;
+    allBtn.innerText = 'Tous';
+    allBtn.onclick = () => { selectedInput.value = ''; renderCatalog(); };
+    container.appendChild(allBtn);
+    
+    genres.forEach(genre => {
+        const btn = document.createElement('button');
+        const isSelected = selectedGenre === genre;
+        const color = getGenreColor(genre);
+        btn.className = `px-4 py-2 rounded-full font-bold text-sm transition-all ${isSelected ? `${color} text-white` : 'border border-gray-300 text-gray-600 hover:bg-gray-100'}`;
+        btn.innerText = genre;
+        btn.onclick = () => { selectedInput.value = genre; renderCatalog(); };
+        container.appendChild(btn);
+    });
 }
 
 function renderDirectorsList() {
@@ -397,6 +563,9 @@ function updateDashboard() {
     const elTotalFavs = document.getElementById('kpi-total-favs');
     if(elTotalFavs) elTotalFavs.innerText = films.filter(f => f.isFavorite).length;
     
+    const elTotalDirectors = document.getElementById('kpi-total-directors');
+    if(elTotalDirectors) elTotalDirectors.innerText = directors.length;
+    
     const ctx = document.getElementById('myChart');
     if(!ctx) return;
     
@@ -406,9 +575,12 @@ function updateDashboard() {
     myChart = new Chart(ctx, { type: 'bar', data: { labels: Object.keys(counts), datasets: [{ label: 'Films', data: Object.values(counts), backgroundColor: '#3b82f6' }] }, options: { maintainAspectRatio: false }});
 }
 
-document.addEventListener('DOMContentLoaded', () => { 
+document.addEventListener('DOMContentLoaded', async () => { 
     setupEventListeners();
     setupFormListeners();
+    
+    await fetchFilmsFromAPI();
+    
     navigateTo('dashboard'); 
     updateDashboard();
 });
