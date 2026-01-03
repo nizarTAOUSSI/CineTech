@@ -45,8 +45,19 @@ Module secondaire lié aux films :
 * Suppression de réalisateurs.
 * [cite_start]*Liaison :* Un film doit être obligatoirement associé à un réalisateur existant[cite: 73].
 
-### 4. 💾 Persistance des Données
-Toutes les données (films et réalisateurs) sont sauvegardées localement dans le navigateur via le **LocalStorage**. [cite_start]Les données ne sont pas perdues après le rechargement de la page[cite: 29].
+### 4. 💾 Persistance des Données & Authentification
+Toutes les données (films, réalisateurs, favoris, notes, utilisateurs) sont sauvegardées localement dans le navigateur via le **LocalStorage**. [cite_start]Les données ne sont pas perdues après le rechargement de la page[cite: 29].
+
+#### 🔑 Gestion des Utilisateurs (Login/Inscription)
+- Lors du premier chargement, la liste des utilisateurs est importée depuis le fichier `users.json` (lecture seule).
+- **L'ajout de nouveaux utilisateurs (inscription) et la connexion (login) sont gérés uniquement via le LocalStorage** :
+	- Toute nouvelle inscription ajoute l'utilisateur dans le LocalStorage (et non dans le fichier users.json).
+	- La connexion vérifie les identifiants dans le LocalStorage.
+- **Limitation** : Le fichier `users.json` n'est jamais modifié côté client (navigateur), car les navigateurs ne permettent pas d'écrire dans les fichiers locaux pour des raisons de sécurité. Pour une gestion persistante côté serveur, un backend serait nécessaire.
+
+#### 📦 Résumé de la persistance :
+- **Films, réalisateurs, favoris, notes, utilisateurs** : LocalStorage (navigateur)
+- **Import initial des utilisateurs** : `users.json` (lecture seule)
 
 ---
 
@@ -59,7 +70,7 @@ Le projet respecte les contraintes techniques du cahier des charges :
 * [cite_start]**Styling :** Tailwind CSS (via CDN) pour une interface responsive et moderne[cite: 49].
 * **Icônes :** FontAwesome.
 * **Graphiques :** Chart.js.
-* **Données :** LocalStorage & API Externe (Asynchrone/Fetch).
+* **Données :** LocalStorage (films, réalisateurs, utilisateurs, favoris, notes) & API Externe (Asynchrone/Fetch).
 
 ---
 
@@ -68,7 +79,7 @@ Le projet respecte les contraintes techniques du cahier des charges :
 ```bash
 CineTech-Project/
 │
-├── index.html      # Point d'entrée unique (SPA Structure)
-├── app.js          # Logique métier (DOM, CRUD, Events, API)
-├── README.md       # Documentation du projet
-└── assets/         # Images et ressources statiques (optionnel)
+├── index.html      # Point d'entrée unique (SPA Structure, login/register inclus)
+├── app.js          # Logique métier (DOM, CRUD, Events, API, gestion locale)
+├── users.json      # Liste initiale des utilisateurs (lecture seule)
+└── README.md       # Documentation du projet
