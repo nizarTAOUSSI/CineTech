@@ -244,6 +244,23 @@
         const registerForm = document.getElementById('register-form');
         const messageEl = document.getElementById('message');
 
+        async function loadUsersToLocalStorage() {
+            if (!localStorage.getItem('cinetech_users')) {
+                try {
+                    const res = await fetch('users.json');
+                    const users = await res.json();
+                    localStorage.setItem('cinetech_users', JSON.stringify(users));
+                } catch (err) {
+                    localStorage.setItem('cinetech_users', '[]');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUsersToLocalStorage();
+            updateUIAuth();
+        });
+
         function openLoginModal(isRegister = false) {
             loginModal.classList.remove('hidden');
             loginModal.classList.add('flex');
@@ -344,13 +361,17 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', updateUIAuth);
-
-        registerForm.onsubmit = (e) => {
+        registerForm.onsubmit = async (e) => {
             e.preventDefault();
             const username = document.getElementById('reg-username').value.trim();
             const password = document.getElementById('reg-password').value.trim();
-            let users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+
+            let users = [];
+            try {
+                users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+            } catch (err) {
+                users = [];
+            }
 
             if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
                 showMessage("Utilisateur déjà pris", true);
@@ -370,7 +391,13 @@
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value.trim();
 
-            let users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+            let users = [];
+            try {
+                users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+            } catch (err) {
+                users = [];
+            }
+
             const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
 
             if (user) {
