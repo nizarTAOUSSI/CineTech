@@ -630,7 +630,41 @@ function deleteDirector(name) {
 
 window.deleteDirector = deleteDirector;
 
+async function initUsers() {
+    try {
+        const response = await fetch('users.json');
+        if (!response.ok) throw new Error('Could not fetch users.json');
+        const jsonUsers = await response.json();
+
+        let localUsers = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+
+        let updated = false;
+        jsonUsers.forEach(jsonUser => {
+            const exists = localUsers.find(u => u.username.toLowerCase() === jsonUser.username.toLowerCase());
+            if (!exists) {
+                if (!jsonUser.createdAt) jsonUser.createdAt = new Date().toISOString();
+                localUsers.push(jsonUser);
+                updated = true;
+            }
+        });
+
+        if (updated || !localStorage.getItem('cinetech_users')) {
+            localStorage.setItem('cinetech_users', JSON.stringify(localUsers));
+        }
+    } catch (error) {
+        console.warn("Manual users sync failed:", error);
+        if (!localStorage.getItem('cinetech_users')) {
+            const defaults = [
+                { id: 1, username: 'admin', role: 'admin', password: 'admin', createdAt: new Date().toISOString() },
+                { id: 2, username: 'user', role: 'user', password: 'user', createdAt: new Date().toISOString() }
+            ];
+            localStorage.setItem('cinetech_users', JSON.stringify(defaults));
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    initUsers();
     requireAuth();
     initUserStorage();
 
