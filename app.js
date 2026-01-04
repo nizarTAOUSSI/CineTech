@@ -776,7 +776,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (config.section === 'films') {
                     const rows = document.querySelectorAll('#films-table-body tr');
                     rows.forEach(row => {
-                        // Check title, director, or genre
                         const text = row.innerText.toLowerCase();
                         row.style.display = text.includes(term) ? '' : 'none';
                     });
