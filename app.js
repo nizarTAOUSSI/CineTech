@@ -2,10 +2,7 @@ function getCurrentUser() {
     return JSON.parse(localStorage.getItem('cinetech_currentUser'));
 }
 function requireAuth() {
-    const isProtectedPage = window.location.pathname.includes('admin.html');
-    if (isProtectedPage && !getCurrentUser()) {
-        window.location.href = 'index.html';
-    }
+    return true;
 }
 function getGlobalRatings() {
     return JSON.parse(localStorage.getItem('cinetech_global_ratings')) || {};
@@ -702,11 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFavorites();
 
     const user = getCurrentUser();
-    if (user && user.role === 'admin' && window.location.pathname.includes('admin.html')) {
-        navigateTo('dashboard');
-    } else {
-        navigateTo('catalog');
-    }
+    navigateTo('catalog');
 
     fetchFilmsFromAPI();
 
@@ -856,4 +849,393 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+
+const loginModal = document.getElementById('login-modal');
+const tabLogin = document.getElementById('tab-login');
+const tabRegister = document.getElementById('tab-register');
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const messageEl = document.getElementById('message');
+
+async function loadUsersToLocalStorage() {
+    if (!localStorage.getItem('cinetech_users')) {
+        try {
+            const res = await fetch('users.json');
+            const users = await res.json();
+            localStorage.setItem('cinetech_users', JSON.stringify(users));
+        } catch (err) {
+            localStorage.setItem('cinetech_users', '[]');
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadUsersToLocalStorage();
+    updateUIAuth();
+});
+
+function openLoginModal(isRegister = false) {
+    loginModal.classList.remove('hidden');
+    loginModal.classList.add('flex');
+    if (isRegister) showRegister(); else showLogin();
+}
+
+function closeLoginModal() {
+    loginModal.classList.add('hidden');
+    loginModal.classList.remove('flex');
+}
+
+function showLogin() {
+    tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600";
+    tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all text-gray-500 hover:text-blue-600";
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+    document.getElementById('modal-user-title').innerText = "Bon retour !";
+}
+
+function showRegister() {
+    tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-green-600";
+    tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all text-gray-500 hover:text-blue-600";
+    registerForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+    document.getElementById('modal-user-title').innerText = "Bienvenue !";
+}
+
+tabLogin.onclick = showLogin;
+tabRegister.onclick = showRegister;
+
+function logout() {
+    localStorage.removeItem('cinetech_currentUser');
+    window.location.reload();
+}
+
+window.logout = logout;
+
+function showMessage(text, isError = false) {
+    messageEl.innerText = text;
+    messageEl.className = `mt-4 text-center text-sm font-bold ${isError ? 'text-red-500' : 'text-green-600'}`;
+    messageEl.classList.remove('hidden');
+}
+
+window.openLoginModal = openLoginModal;
+
+function updateUIAuth() {
+    const user = JSON.parse(localStorage.getItem('cinetech_currentUser'));
+    const authBtns = document.getElementById('auth-buttons');
+    const userProfile = document.getElementById('user-profile');
+    const adminSidebar = document.getElementById('admin-sidebar');
+    const mainNav = document.getElementById('main-nav');
+    const mainHero = document.getElementById('main-hero');
+    const mainContent = document.querySelector('main');
+
+    if (user) {
+        authBtns.classList.add('hidden');
+        userProfile.classList.remove('hidden');
+        document.getElementById('nav-username').innerText = user.username;
+        
+        const avatarColor = user.avatarColor || 'blue';
+        const navAvatar = document.getElementById('nav-avatar');
+        navAvatar.innerText = user.username.charAt(0).toUpperCase();
+        navAvatar.className = `w-10 h-10 rounded-full bg-gradient-to-br from-${avatarColor}-400 to-${avatarColor}-600 flex items-center justify-center font-bold border-2 border-white shadow-md hover:ring-2 hover:ring-${avatarColor}-100 transition-all cursor-pointer text-white`;
+
+        const roleEl = document.getElementById('nav-role');
+        if (roleEl) {
+            roleEl.innerText = user.role === 'admin' ? 'Administrateur' : "Membre";
+            roleEl.className = "text-[10px] text-slate-400 font-bold uppercase tracking-wider";
+        }
+
+        const favLink = document.getElementById('nav-favorites');
+        if (favLink) favLink.classList.remove('hidden');
+
+        const profileLink = document.getElementById('nav-profile');
+        if (profileLink) profileLink.classList.remove('hidden');
+
+        if (user.role === 'admin') {
+            const adminLink = document.getElementById('nav-admin');
+            if (adminLink) adminLink.classList.remove('hidden');
+        }
+    }
+}
+
+const originalNavigateTo = window.navigateTo;
+window.navigateTo = function (section) {
+    const user = JSON.parse(localStorage.getItem('cinetech_currentUser'));
+    const isAdminSection = ['dashboard', 'films', 'directors', 'users'].includes(section);
+    
+    if ((section === 'favorites' || section === 'profile') && !user) {
+        openLoginModal();
+        return;
+    }
+
+    if (isAdminSection && (!user || user.role !== 'admin')) {
+        alert('Accès réservé aux administrateurs');
+        navigateTo('catalog');
+        return;
+    }
+
+    document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+    
+    const target = document.getElementById(`section-${section}`);
+    if (target) target.classList.remove('hidden');
+    
+    if (user && user.role === 'admin') {
+        document.querySelectorAll('.sidebar-nav-link').forEach(l => {
+            l.classList.remove('bg-blue-600', 'text-white');
+            l.classList.add('text-slate-300');
+        });
+        const sidebarLink = document.getElementById(`sidebar-nav-${section}`);
+        if (sidebarLink) {
+            sidebarLink.classList.add('bg-blue-600', 'text-white');
+            sidebarLink.classList.remove('text-slate-300');
+        }
+    } else {
+        document.querySelectorAll('.nav-link').forEach(l => {
+            l.classList.remove('text-blue-600');
+            l.classList.add('text-slate-600');
+        });
+        const activeLink = document.getElementById(`nav-${section}`);
+        if (activeLink) {
+            activeLink.classList.add('text-blue-600');
+            activeLink.classList.remove('text-slate-600');
+        }
+    }
+
+    const mainHero = document.getElementById('main-hero');
+    const mainContent = document.querySelector('main');
+    const mainNav = document.getElementById('main-nav');
+    const adminSidebar = document.getElementById('admin-sidebar');
+    
+    if (section === 'catalog') {
+        if (mainHero) mainHero.classList.remove('hidden');
+        
+        if (user && user.role === 'admin') {
+            adminSidebar.classList.add('hidden');
+            adminSidebar.classList.remove('flex');
+            mainNav.classList.remove('hidden');
+            mainContent.classList.remove('ml-64');
+            mainContent.classList.add('max-w-7xl', 'mx-auto');
+        }
+    } else {
+        if (mainHero) mainHero.classList.add('hidden');
+        
+        if (user && user.role === 'admin' && isAdminSection) {
+            adminSidebar.classList.remove('hidden');
+            adminSidebar.classList.add('flex');
+            mainNav.classList.add('hidden');
+            mainContent.classList.add('ml-64');
+            mainContent.classList.remove('max-w-7xl', 'mx-auto');
+        }
+    }
+
+    if (section === 'favorites') {
+        renderFavorites();
+    }
+    if (section === 'catalog') {
+        renderCatalog();
+    }
+    if (section === 'users') {
+        renderUsers();
+    }
+    if (section === 'films') {
+        renderAdminFilms();
+    }
+    if (section === 'directors') {
+        renderDirectors();
+    }
+    if (section === 'dashboard') {
+        renderAdminDashboard();
+    }
+    if (section === 'profile') {
+        renderProfile();
+    }
+};
+
+registerForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value.trim();
+
+    let users = [];
+    try {
+        users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+    } catch (err) {
+        users = [];
+    }
+
+    if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+        showMessage("Utilisateur déjà pris", true);
+        return;
+    }
+
+    const newUser = { id: Date.now(), username, password, role: 'user', createdAt: new Date().toISOString() };
+    users.push(newUser);
+    localStorage.setItem('cinetech_users', JSON.stringify(users));
+    localStorage.setItem('cinetech_currentUser', JSON.stringify(newUser));
+    showMessage("Bienvenue chez CineTech !");
+    setTimeout(() => window.location.reload(), 1000);
+};
+
+loginForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+
+    let users = [];
+    try {
+        users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+    } catch (err) {
+        users = [];
+    }
+
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+
+    if (user) {
+        localStorage.setItem('cinetech_currentUser', JSON.stringify(user));
+        showMessage("Connexion réussie !");
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    } else {
+        showMessage("Identifiants incorrects", true);
+    }
+};
+
+function renderProfile() {
+    const user = getCurrentUser();
+    if (!user) {
+        navigateTo('catalog');
+        return;
+    }
+
+    document.getElementById('profile-username').innerText = user.username;
+    document.getElementById('profile-role').innerText = user.role === 'admin' ? 'Administrateur' : 'Membre';
+    
+    const avatarColor = user.avatarColor || 'blue';
+    const profileAvatar = document.getElementById('profile-avatar');
+    profileAvatar.innerText = user.username.charAt(0).toUpperCase();
+    profileAvatar.className = `w-20 h-20 rounded-full bg-gradient-to-br from-${avatarColor}-400 to-${avatarColor}-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg`;
+
+    document.getElementById('profile-edit-username').value = user.username;
+    document.getElementById('profile-edit-email').value = user.email || '';
+
+    const favs = getFavorites();
+    document.getElementById('profile-favs-count').innerText = favs.length;
+
+    const allRatings = getGlobalRatings();
+    let userRatingsCount = 0;
+    let totalRating = 0;
+    Object.keys(allRatings).forEach(filmId => {
+        if (allRatings[filmId][user.id]) {
+            userRatingsCount++;
+            totalRating += allRatings[filmId][user.id];
+        }
+    });
+    document.getElementById('profile-ratings-count').innerText = userRatingsCount;
+    document.getElementById('profile-avg-rating').innerText = userRatingsCount > 0 ? (totalRating / userRatingsCount).toFixed(1) : '0';
+
+    const createdAt = new Date(user.createdAt || Date.now());
+    const today = new Date();
+    const daysDiff = Math.floor((today - createdAt) / (1000 * 60 * 60 * 24));
+    document.getElementById('profile-member-days').innerText = daysDiff;
+}
+
+const profileInfoForm = document.getElementById('profile-info-form');
+if (profileInfoForm) {
+    profileInfoForm.onsubmit = (e) => {
+        e.preventDefault();
+        const user = getCurrentUser();
+        if (!user) return;
+
+        const newUsername = document.getElementById('profile-edit-username').value.trim();
+        const newEmail = document.getElementById('profile-edit-email').value.trim();
+
+        let users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+        const existingUser = users.find(u => u.username.toLowerCase() === newUsername.toLowerCase() && u.id !== user.id);
+        
+        if (existingUser) {
+            alert('Ce nom d\'utilisateur est déjà pris');
+            return;
+        }
+
+        users = users.map(u => {
+            if (u.id === user.id) {
+                return { ...u, username: newUsername, email: newEmail };
+            }
+            return u;
+        });
+
+        localStorage.setItem('cinetech_users', JSON.stringify(users));
+        
+        const updatedUser = users.find(u => u.id === user.id);
+        localStorage.setItem('cinetech_currentUser', JSON.stringify(updatedUser));
+
+        alert('Profil mis à jour avec succès !');
+        window.location.reload();
+    };
+}
+
+const profilePasswordForm = document.getElementById('profile-password-form');
+if (profilePasswordForm) {
+    profilePasswordForm.onsubmit = (e) => {
+        e.preventDefault();
+        const user = getCurrentUser();
+        if (!user) return;
+
+        const currentPassword = document.getElementById('profile-current-password').value;
+        const newPassword = document.getElementById('profile-new-password').value;
+        const confirmPassword = document.getElementById('profile-confirm-password').value;
+
+        if (user.password !== currentPassword) {
+            alert('Mot de passe actuel incorrect');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Les nouveaux mots de passe ne correspondent pas');
+            return;
+        }
+
+        if (newPassword.length < 4) {
+            alert('Le mot de passe doit contenir au moins 4 caractères');
+            return;
+        }
+
+        let users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+        users = users.map(u => {
+            if (u.id === user.id) {
+                return { ...u, password: newPassword };
+            }
+            return u;
+        });
+
+        localStorage.setItem('cinetech_users', JSON.stringify(users));
+        
+        const updatedUser = users.find(u => u.id === user.id);
+        localStorage.setItem('cinetech_currentUser', JSON.stringify(updatedUser));
+
+        alert('Mot de passe mis à jour avec succès !');
+        profilePasswordForm.reset();
+    };
+}
+
+window.changeAvatarColor = function(color) {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    let users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
+    users = users.map(u => {
+        if (u.id === user.id) {
+            return { ...u, avatarColor: color };
+        }
+        return u;
+    });
+
+    localStorage.setItem('cinetech_users', JSON.stringify(users));
+    
+    const updatedUser = users.find(u => u.id === user.id);
+    localStorage.setItem('cinetech_currentUser', JSON.stringify(updatedUser));
+
+    renderProfile();
+    updateUIAuth();
+};
 

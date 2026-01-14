@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineTech - Découvrez le Cinéma</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -18,13 +19,75 @@
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
         }
+
+        #admin-sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            #admin-sidebar.hidden-mobile {
+                transform: translateX(-100%);
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 text-slate-900">
 
+    <aside id="admin-sidebar" class="hidden fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white flex-col z-50">
+        <div class="h-16 flex items-center justify-center border-b border-slate-700">
+            <div class="text-2xl gap-2 flex font-bold text-blue-400 cursor-pointer" onclick="navigateTo('catalog')">
+                <img src="./assets/logo_white.png" alt="cinetech" class="w-10 h-10">
+                CineTech
+            </div>
+        </div>
 
-    <nav class="fixed top-0 w-full z-40 glass border-b border-gray-200">
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            <a href="#" onclick="navigateTo('dashboard')" id="sidebar-nav-dashboard"
+                class="sidebar-nav-link flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                <i class="fas fa-tachometer-alt w-6"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#" onclick="navigateTo('films')" id="sidebar-nav-films"
+                class="sidebar-nav-link flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                <i class="fas fa-video w-6"></i>
+                <span>Gestion Films</span>
+            </a>
+
+            <a href="#" onclick="navigateTo('directors')" id="sidebar-nav-directors"
+                class="sidebar-nav-link flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                <i class="fas fa-user-tie w-6"></i>
+                <span>Réalisateurs</span>
+            </a>
+
+            <a href="#" onclick="navigateTo('users')" id="sidebar-nav-users"
+                class="sidebar-nav-link flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                <i class="fas fa-users w-6"></i>
+                <span>Utilisateurs</span>
+            </a>
+
+            <div class="border-t border-slate-700 my-4"></div>
+
+            <a href="#" onclick="navigateTo('profile')" id="sidebar-nav-profile"
+                class="sidebar-nav-link flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                <i class="fas fa-user-circle w-6"></i>
+                <span>Mon Profil</span>
+            </a>
+
+            <a href="#" onclick="logout()"
+                class="sidebar-nav-link flex items-center px-4 py-3 text-slate-300 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-4">
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span>Déconnexion</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-slate-700">
+            <p class="text-xs text-slate-400 text-center">&copy; 2025 CineTech SPA</p>
+        </div>
+    </aside>
+
+    <nav id="main-nav" class="fixed top-0 w-full z-40 glass border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('catalog')">
@@ -39,9 +102,12 @@
                     <a href="#favorites" id="nav-favorites" onclick="navigateTo('favorites')"
                         class="nav-link hidden text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">Mes
                         Favoris</a>
-                    <a href="admin.html" id="nav-admin"
+                    <!-- <a href="#profile" id="nav-profile" onclick="navigateTo('profile')"
+                        class="nav-link hidden text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">Mon
+                        Profil</a> -->
+                    <a href="#" onclick="navigateTo('dashboard')" id="nav-admin"
                         class="hidden text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors">
-                        <i class="fas fa-user-shield mr-1"></i> Dashboard Admin
+                        <i class="fas fa-user-shield mr-1"></i> Admin Panel
                     </a>
                 </div>
 
@@ -60,7 +126,7 @@
                                 <p id="nav-role" class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                                     Membre</p>
                             </div>
-                            <div onclick="navigateTo('favorites')"
+                            <div onclick="navigateTo('profile')"
                                 class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold border-2 border-white shadow-md hover:ring-2 hover:ring-blue-100 transition-all cursor-pointer"
                                 id="nav-avatar"></div>
                         </div>
@@ -114,6 +180,122 @@
         </section>
 
 
+        <section id="section-profile" class="page-section hidden pt-10">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+                    <div class="p-8 border-b border-slate-50 bg-gradient-to-r from-blue-50 to-purple-50">
+                        <div class="flex items-center gap-6">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg" id="profile-avatar"></div>
+                            <div>
+                                <h3 class="text-3xl font-black text-slate-900" id="profile-username"></h3>
+                                <p class="text-sm text-slate-500 font-bold uppercase tracking-wider" id="profile-role"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 space-y-8">
+                        <div class="bg-slate-50 rounded-2xl p-6">
+                            <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <i class="fas fa-user-edit text-blue-600"></i>
+                                Informations du profil
+                            </h4>
+                            <form id="profile-info-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Nom d'utilisateur</label>
+                                    <input type="text" id="profile-edit-username" required
+                                        class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold"
+                                        placeholder="Votre nom d'utilisateur">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Email (optionnel)</label>
+                                    <input type="email" id="profile-edit-email"
+                                        class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold"
+                                        placeholder="votre@email.com">
+                                </div>
+                                <button type="submit"
+                                    class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 transition-all">
+                                    <i class="fas fa-save mr-2"></i>Enregistrer les modifications
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-6">
+                            <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <i class="fas fa-lock text-purple-600"></i>
+                                Changer le mot de passe
+                            </h4>
+                            <form id="profile-password-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Mot de passe actuel</label>
+                                    <input type="password" id="profile-current-password" required
+                                        class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all font-semibold"
+                                        placeholder="••••••••">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Nouveau mot de passe</label>
+                                    <input type="password" id="profile-new-password" required
+                                        class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all font-semibold"
+                                        placeholder="••••••••">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Confirmer le nouveau mot de passe</label>
+                                    <input type="password" id="profile-confirm-password" required
+                                        class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all font-semibold"
+                                        placeholder="••••••••">
+                                </div>
+                                <button type="submit"
+                                    class="w-full py-3 bg-purple-600 text-white rounded-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-700 hover:-translate-y-0.5 transition-all">
+                                    <i class="fas fa-key mr-2"></i>Mettre à jour le mot de passe
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-6">
+                            <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <i class="fas fa-palette text-green-600"></i>
+                                Couleur de l'avatar
+                            </h4>
+                            <div class="grid grid-cols-8 gap-3">
+                                <button type="button" onclick="changeAvatarColor('blue')" class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('purple')" class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('green')" class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('red')" class="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('yellow')" class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('pink')" class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('indigo')" class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('teal')" class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 hover:scale-110 transition-transform shadow-lg"></button>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 border border-slate-100">
+                            <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <i class="fas fa-chart-line text-blue-600"></i>
+                                Statistiques du compte
+                            </h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <p class="text-3xl font-black text-blue-600" id="profile-favs-count">0</p>
+                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Favoris</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-3xl font-black text-purple-600" id="profile-ratings-count">0</p>
+                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Notes</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-3xl font-black text-green-600" id="profile-member-days">0</p>
+                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Jours</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-3xl font-black text-orange-600" id="profile-avg-rating">0</p>
+                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Moy. Notes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="section-favorites" class="page-section hidden pt-10">
             <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
                 <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
@@ -149,7 +331,204 @@
                 </div>
             </div>
         </section>
+
+        <section id="section-dashboard" class="page-section hidden pt-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-5 border-l-4 border-blue-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 uppercase font-bold">Films Totaux</p>
+                            <p class="text-2xl font-bold text-gray-800" id="kpi-total-films">0</p>
+                        </div>
+                        <div class="text-blue-500 text-3xl opacity-50"><i class="fas fa-film"></i></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-5 border-l-4 border-green-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 uppercase font-bold">Réalisateurs</p>
+                            <p class="text-2xl font-bold text-gray-800" id="kpi-total-directors">0</p>
+                        </div>
+                        <div class="text-green-500 text-3xl opacity-50"><i class="fas fa-bullhorn"></i></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-5 border-l-4 border-purple-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 uppercase font-bold">Note Moyenne</p>
+                            <p class="text-lg font-bold text-gray-800" id="kpi-avg-rating">0 / 10</p>
+                        </div>
+                        <div class="text-purple-500 text-3xl opacity-50"><i class="fas fa-star"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-700 mb-4">Statistiques Films par Genre</h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-films" class="page-section hidden pt-10">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h3 class="text-xl font-bold text-gray-800">Liste des Films</h3>
+
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <input type="text" id="search-film" placeholder="Rechercher un film..."
+                            class="border rounded px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button onclick="prepareAddFilm()"
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-plus"></i> Ajouter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-600 text-sm uppercase">
+                                <th class="p-3 border-b">Affiche</th>
+                                <th class="p-3 border-b">Titre</th>
+                                <th class="p-3 border-b">Réalisateur</th>
+                                <th class="p-3 border-b">Année</th>
+                                <th class="p-3 border-b">Genre</th>
+                                <th class="p-3 border-b">Note</th>
+                                <th class="p-3 border-b">Source</th>
+                                <th class="p-3 border-b text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="films-table-body" class="text-gray-700 text-sm">
+                            <tr>
+                                <td colspan="8" class="p-4 text-center text-gray-500">Aucun film trouvé.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Directors Section -->
+        <section id="section-directors" class="page-section hidden pt-10">
+            <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-100 pb-4 gap-4">
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Répertoire des Réalisateurs</h3>
+                        <p class="text-sm text-slate-400 mt-1">Gérez vos réalisateurs et leurs films.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="search-director" placeholder="Rechercher un réalisateur..."
+                            class="border rounded px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="directors-list">
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Users Section -->
+        <section id="section-users" class="page-section hidden pt-10">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
+                    <h3 class="text-xl font-bold text-gray-800">Gestion des Utilisateurs</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="search-user" placeholder="Rechercher un utilisateur..."
+                            class="border rounded px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider font-bold">
+                                <th class="p-4 border-b">Utilisateur</th>
+                                <th class="p-4 border-b">Rôle Actuel</th>
+                                <th class="p-4 border-b">Date d'inscription</th>
+                                <th class="p-4 border-b text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="text-gray-700 text-sm">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <div id="film-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="modal-title">Ajouter un Film</h3>
+                <button onclick="closeFilmModal()" class="text-gray-500 hover:text-red-500"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <form id="film-form" class="space-y-4">
+                <input type="hidden" id="film-id">
+                <input type="hidden" id="film-is-external" value="false">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Titre</label>
+                    <input type="text" id="film-title" required
+                        class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Réalisateur</label>
+                    <input type="text" id="film-director" required
+                        class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Année</label>
+                        <input type="number" id="film-year" required min="1900" max="2099"
+                            class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Note (/10)</label>
+                        <input type="number" id="film-rating" required min="0" max="10" step="0.1"
+                            class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Genre</label>
+                    <input type="text" id="film-genre" required
+                        class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Affiche (URL)</label>
+                    <input type="url" id="film-poster"
+                        class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="https://exemple.com/image.jpg">
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Director Modal -->
+    <div id="director-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Modifier le Réalisateur</h3>
+                <button onclick="closeDirectorModal()" class="text-gray-500 hover:text-red-500"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <form id="director-form" class="space-y-4">
+                <input type="hidden" id="old-director-name">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nouveau Nom</label>
+                    <input type="text" id="new-director-name" required
+                        class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Enregistrer les
+                    modifications</button>
+            </form>
+        </div>
+    </div>
 
 
     <div id="login-modal"
@@ -230,190 +609,7 @@
         </div>
     </div>
 
-
-    <div id="section-dashboard" class="hidden"></div>
-    <div id="section-films" class="hidden"></div>
-    <div id="section-directors" class="hidden"></div>
-    <div id="section-users" class="hidden"></div>
-
     <script src="app.js"></script>
-    <script>
-        const loginModal = document.getElementById('login-modal');
-        const tabLogin = document.getElementById('tab-login');
-        const tabRegister = document.getElementById('tab-register');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const messageEl = document.getElementById('message');
-
-        async function loadUsersToLocalStorage() {
-            if (!localStorage.getItem('cinetech_users')) {
-                try {
-                    const res = await fetch('users.json');
-                    const users = await res.json();
-                    localStorage.setItem('cinetech_users', JSON.stringify(users));
-                } catch (err) {
-                    localStorage.setItem('cinetech_users', '[]');
-                }
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadUsersToLocalStorage();
-            updateUIAuth();
-        });
-
-        function openLoginModal(isRegister = false) {
-            loginModal.classList.remove('hidden');
-            loginModal.classList.add('flex');
-            if (isRegister) showRegister(); else showLogin();
-        }
-
-        function closeLoginModal() {
-            loginModal.classList.add('hidden');
-            loginModal.classList.remove('flex');
-        }
-
-        function showLogin() {
-            tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600";
-            tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all text-gray-500 hover:text-blue-600";
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-            document.getElementById('modal-user-title').innerText = "Bon retour !";
-        }
-
-        function showRegister() {
-            tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-green-600";
-            tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-all text-gray-500 hover:text-blue-600";
-            registerForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
-            document.getElementById('modal-user-title').innerText = "Bienvenue !";
-        }
-
-        tabLogin.onclick = showLogin;
-        tabRegister.onclick = showRegister;
-
-        function logout() {
-            localStorage.removeItem('cinetech_currentUser');
-            window.location.reload();
-        }
-
-        window.logout = logout;
-
-        function showMessage(text, isError = false) {
-            messageEl.innerText = text;
-            messageEl.className = `mt-4 text-center text-sm font-bold ${isError ? 'text-red-500' : 'text-green-600'}`;
-            messageEl.classList.remove('hidden');
-        }
-
-        window.openLoginModal = openLoginModal;
-
-        function updateUIAuth() {
-            const user = JSON.parse(localStorage.getItem('cinetech_currentUser'));
-            const authBtns = document.getElementById('auth-buttons');
-            const userProfile = document.getElementById('user-profile');
-
-            if (user) {
-                authBtns.classList.add('hidden');
-                userProfile.classList.remove('hidden');
-                document.getElementById('nav-username').innerText = user.username;
-                document.getElementById('nav-avatar').innerText = user.username.charAt(0).toUpperCase();
-
-                const roleEl = document.getElementById('nav-role');
-                if (roleEl) {
-                    roleEl.innerText = "Membre";
-                    roleEl.className = "text-[10px] text-slate-400 font-bold uppercase tracking-wider";
-                }
-
-                const favLink = document.getElementById('nav-favorites');
-                if (favLink) favLink.classList.remove('hidden');
-
-                if (user.role === 'admin') {
-                    const adminLink = document.getElementById('nav-admin');
-                    if (adminLink) adminLink.classList.remove('hidden');
-                }
-            }
-        }
-
-        const originalNavigateTo = window.navigateTo;
-        window.navigateTo = function (section) {
-            if (section === 'favorites' && !JSON.parse(localStorage.getItem('cinetech_currentUser'))) {
-                openLoginModal();
-                return;
-            }
-
-            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-            const target = document.getElementById(`section-${section}`);
-            if (target) target.classList.remove('hidden');
-            document.querySelectorAll('.nav-link').forEach(l => {
-                l.classList.remove('text-blue-600');
-                l.classList.add('text-slate-600');
-            });
-            const activeLink = document.getElementById(`nav-${section === 'favorites' ? 'favorites' : 'catalog'}`);
-            if (activeLink) {
-                activeLink.classList.add('text-blue-600');
-                activeLink.classList.remove('text-slate-600');
-            }
-
-            if (section === 'favorites') {
-                renderFavorites();
-                if (document.getElementById('main-hero')) document.getElementById('main-hero').classList.add('hidden');
-            }
-            if (section === 'catalog') {
-                renderCatalog();
-                if (document.getElementById('main-hero')) document.getElementById('main-hero').classList.remove('hidden');
-            }
-        };
-
-        registerForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('reg-username').value.trim();
-            const password = document.getElementById('reg-password').value.trim();
-
-            let users = [];
-            try {
-                users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
-            } catch (err) {
-                users = [];
-            }
-
-            if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
-                showMessage("Utilisateur déjà pris", true);
-                return;
-            }
-
-            const newUser = { id: Date.now(), username, password, role: 'user', createdAt: new Date().toISOString() };
-            users.push(newUser);
-            localStorage.setItem('cinetech_users', JSON.stringify(users));
-            localStorage.setItem('cinetech_currentUser', JSON.stringify(newUser));
-            showMessage("Bienvenue chez CineTech !");
-            setTimeout(() => window.location.reload(), 1000);
-        };
-
-        loginForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-
-            let users = [];
-            try {
-                users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
-            } catch (err) {
-                users = [];
-            }
-
-            const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-
-            if (user) {
-                localStorage.setItem('cinetech_currentUser', JSON.stringify(user));
-                showMessage("Connexion réussie !");
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                showMessage("Identifiants incorrects", true);
-            }
-        };
-    </script>
 </body>
 
 </html>

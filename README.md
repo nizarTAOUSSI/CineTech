@@ -1,6 +1,8 @@
-# 🎬 CineTech - Smart Backoffice Dashboard
+# 🎬 CineTech - Single Page Application (SPA)
 
-> **Projet Front-End - Développement Web** > **École Marocaine des Sciences de l'Ingénieur (EMSI) - Les Orangers** > **Année Universitaire : 2025-2026**
+> **Projet Front-End - Développement Web**  
+> **École Marocaine des Sciences de l'Ingénieur (EMSI) - Les Orangers**  
+> **Année Universitaire : 2025-2026**
 
 ---
 
@@ -16,70 +18,268 @@ Ce projet a été réalisé par :
 ---
 
 ## 📝 Présentation du Projet
-[cite_start]**CineTech** est une application Web de type **Backoffice Dashboard** (Single Page Application - SPA) destinée à la gestion d'une base de données cinématographique[cite: 7, 9, 102].
+**CineTech** est une application Web de type **Single Page Application (SPA)** destinée à la gestion d'une base de données cinématographique.
 
-L'objectif est de fournir une interface moderne et intuitive pour gérer des films et des réalisateurs, tout en visualisant des statistiques dynamiques via un Dashboard interactif. [cite_start]Le projet est développé exclusivement en **HTML5, CSS3 (Tailwind CSS) et JavaScript Vanilla**, sans utilisation de frameworks JS (React, Angular, Vue)[cite: 11].
+L'objectif est de fournir une interface moderne et intuitive pour gérer des films et des réalisateurs, tout en visualisant des statistiques dynamiques via un Dashboard interactif. Le projet est développé exclusivement en **HTML5, CSS3 (Tailwind CSS) et JavaScript Vanilla**, sans utilisation de frameworks JS (React, Angular, Vue).
+
+### ✨ Architecture SPA
+CineTech est une **vraie Single Page Application** :
+- **Une seule page HTML** (`index.html`) qui contient toutes les sections
+- **Navigation sans rechargement** : Toutes les transitions se font via JavaScript
+- **Layout dynamique** : L'interface s'adapte automatiquement selon le rôle (utilisateur/admin)
+- **Gestion d'état** : LocalStorage pour la persistance des données
 
 ---
 
 ## 🚀 Fonctionnalités Principales
 
-### [cite_start]1. 📊 Dashboard & API (Module Analytique) [cite: 74]
+### 1. 📊 Dashboard Admin (Module Analytique)
 Vue synoptique offrant une vision globale des données :
-* [cite_start]**KPIs Dynamiques :** Affichage du nombre total de films, de réalisateurs et indicateurs de performance[cite: 76].
-* [cite_start]**Graphiques :** Visualisation des statistiques (ex: Films par genre) via la librairie **Chart.js**[cite: 77].
-* [cite_start]**Intégration API Externe :** Connexion à une API de cinéma (OMDB/TMDB) pour récupérer des données en temps réel (notes, tendances) via `fetch()`[cite: 93].
+* **KPIs Dynamiques :** Affichage du nombre total de films, de réalisateurs et note moyenne
+* **Graphiques :** Visualisation des statistiques (Films par genre) via **Chart.js**
+* **Intégration API Externe :** Connexion à l'API Studio Ghibli pour récupérer des films en temps réel
+* **Cache intelligent :** Les données API sont mises en cache (localStorage) et ne sont récupérées qu'une seule fois
 
-### [cite_start]2. 🎬 Gestion des Films (CRUD Complet) [cite: 51]
+### 2. 🎬 Gestion des Films (CRUD Complet)
 Module principal permettant la gestion complète du catalogue :
-* **Création :** Formulaire validé pour ajouter un film (Titre, Année, Genre, Réalisateur).
-* **Lecture :** Affichage sous forme de tableau avec images.
-* **Mise à jour :** Modification des informations d'un film existant.
-* [cite_start]**Suppression :** Retrait d'un film avec demande de confirmation[cite: 64].
-* [cite_start]**Fonctions avancées :** Recherche dynamique par mot-clé et tri des données[cite: 55, 56].
+* **Création :** Formulaire validé pour ajouter un film (Titre, Année, Genre, Réalisateur, Poster)
+* **Lecture :** Affichage sous forme de tableau avec images et informations détaillées
+* **Mise à jour :** Modification des films locaux et conversion des films API en films locaux lors de l'édition
+* **Suppression :** Retrait de films avec confirmation (suppression définitive pour films locaux, masquage pour films API)
+* **Fonctions avancées :** Recherche dynamique en temps réel
 
-### [cite_start]3. 🎥 Gestion des Réalisateurs (CRUD Secondaire) [cite: 67]
+### 3. 🎥 Gestion des Réalisateurs (CRUD Secondaire)
 Module secondaire lié aux films :
-* Ajout de nouveaux réalisateurs via formulaire.
-* Affichage de la liste des réalisateurs.
-* Suppression de réalisateurs.
-* [cite_start]*Liaison :* Un film doit être obligatoirement associé à un réalisateur existant[cite: 73].
+* Affichage de tous les réalisateurs (locaux + API) avec comptage des films
+* Modification de réalisateurs (renommage pour films locaux uniquement)
+* Suppression de réalisateurs et de leurs films associés
+* **Liaison intelligente :** Un film doit être associé à un réalisateur
 
-### 4. 💾 Persistance des Données & Authentification
-Toutes les données (films, réalisateurs, favoris, notes, utilisateurs) sont sauvegardées localement dans le navigateur via le **LocalStorage**. [cite_start]Les données ne sont pas perdues après le rechargement de la page[cite: 29].
+### 4. ⭐ Système de Favoris et Notation
+* **Favoris par utilisateur :** Chaque utilisateur peut marquer ses films préférés
+* **Système de notation :** Notes sur 10 étoiles avec calcul de moyenne globale
+* **Persistance :** Toutes les notes et favoris sont sauvegardés par utilisateur
 
-#### 🔑 Gestion des Utilisateurs (Login/Inscription)
-- Lors du premier chargement, la liste des utilisateurs est importée depuis le fichier `users.json` (lecture seule).
-- **L'ajout de nouveaux utilisateurs (inscription) et la connexion (login) sont gérés uniquement via le LocalStorage** :
-	- Toute nouvelle inscription ajoute l'utilisateur dans le LocalStorage (et non dans le fichier users.json).
-	- La connexion vérifie les identifiants dans le LocalStorage.
-- **Limitation** : Le fichier `users.json` n'est jamais modifié côté client (navigateur), car les navigateurs ne permettent pas d'écrire dans les fichiers locaux pour des raisons de sécurité. Pour une gestion persistante côté serveur, un backend serait nécessaire.
+### 5. 👥 Gestion des Utilisateurs
+* **Authentification :** Système de login/inscription avec LocalStorage
+* **Rôles :** Utilisateur standard et Administrateur
+* **Import initial :** Chargement des utilisateurs depuis `users.json`
+* **Administration :** Les admins peuvent gérer les utilisateurs (modifier rôles, supprimer)
 
-#### 📦 Résumé de la persistance :
-- **Films, réalisateurs, favoris, notes, utilisateurs** : LocalStorage (navigateur)
-- **Import initial des utilisateurs** : `users.json` (lecture seule)
+### 6. 💾 Persistance des Données
+Toutes les données sont sauvegardées localement dans le navigateur via **LocalStorage** :
+- **Films locaux** : `cinetech_films`
+- **Films API** : `cinetech_api_films` (cache persistant)
+- **Utilisateurs** : `cinetech_users`
+- **Favoris** : `cinetech_favs_{username}`
+- **Notes** : `cinetech_global_ratings`
+- **Utilisateur connecté** : `cinetech_currentUser`
+
+Les données ne sont jamais perdues après rechargement de la page.
 
 ---
 
 ## 🛠️ Stack Technique
 
-Le projet respecte les contraintes techniques du cahier des charges :
+Le projet respecte une architecture SPA pure :
 
-* [cite_start]**Structure :** Single Page Application (SPA)[cite: 38].
-* **Frontend :** HTML5, JavaScript (ES6+).
-* [cite_start]**Styling :** Tailwind CSS (via CDN) pour une interface responsive et moderne[cite: 49].
-* **Icônes :** FontAwesome.
-* **Graphiques :** Chart.js.
-* **Données :** LocalStorage (films, réalisateurs, utilisateurs, favoris, notes) & API Externe (Asynchrone/Fetch).
+* **Architecture :** Single Page Application (SPA) - une seule page HTML
+* **Structure :** HTML5 sémantique avec sections dynamiques
+* **Logique :** JavaScript Vanilla (ES6+) - navigation sans rechargement
+* **Styling :** Tailwind CSS (via CDN) pour une interface responsive et moderne
+* **Icônes :** FontAwesome 6.4.0
+* **Graphiques :** Chart.js pour les statistiques
+* **API :** Studio Ghibli API (avec mise en cache LocalStorage)
+* **Stockage :** LocalStorage pour la persistance complète
 
 ---
 
 ## 📂 Structure du Projet
 
 ```bash
-CineTech-Project/
+CineTech-SPA/
 │
-├── index.html      # Point d'entrée unique (SPA Structure, login/register inclus)
-├── app.js          # Logique métier (DOM, CRUD, Events, API, gestion locale)
-├── users.json      # Liste initiale des utilisateurs (lecture seule)
-└── README.md       # Documentation du projet
+├── index.html          # Point d'entrée unique (SPA)
+│                       # Contient toutes les sections (catalog, favorites, dashboard, films, directors, users)
+│                       # Navigation dynamique via JavaScript
+│
+├── app.js              # Logique métier complète
+│                       # - CRUD films et réalisateurs
+│                       # - Gestion d'authentification
+│                       # - Navigation SPA
+│                       # - Intégration API
+│                       # - Système de favoris et notation
+│
+├── users.json          # Liste initiale des utilisateurs (lecture seule)
+│                       # Importé au premier chargement dans LocalStorage
+│
+├── assets/             # Ressources visuelles
+│   ├── logo.png
+│   └── logo_white.png
+│
+└── README.md           # Documentation complète
+```
+
+---
+
+## 🎯 Fonctionnement de la SPA
+
+### Navigation Sans Rechargement
+La fonction `navigateTo(section)` gère toute la navigation :
+```javascript
+navigateTo('catalog')    // Affiche le catalogue
+navigateTo('dashboard')  // Affiche le dashboard admin
+navigateTo('favorites')  // Affiche les favoris
+```
+
+### Layout Adaptatif
+- **Utilisateurs standard** : Navigation horizontale + Hero + Contenu
+- **Administrateurs** : Sidebar verticale + Dashboard + Outils de gestion
+
+L'interface se transforme automatiquement selon le rôle de l'utilisateur connecté.
+
+---
+
+## 🚦 Guide de Démarrage
+
+### Installation
+1. Clonez ou téléchargez le projet
+2. Ouvrez `index.html` dans un navigateur moderne
+3. **C'est tout !** Aucune installation nécessaire
+
+### Comptes de Démonstration
+Le fichier `users.json` contient des comptes pré-configurés :
+
+**Administrateurs :**
+- Username: `admin` / Password: `admin`
+- Username: `nizar` / Password: `nizar`
+- Username: `anwar` / Password: `anwar`
+
+**Utilisateurs :**
+- Username: `user` / Password: `user`
+- Username: `othmane` / Password: `othmane`
+
+### Première Utilisation
+1. Au premier chargement, les films de l'API Studio Ghibli sont récupérés et mis en cache
+2. Connectez-vous avec un compte admin pour accéder au dashboard complet
+3. Les données API sont persistantes - pas besoin de connexion internet après le premier chargement
+
+---
+
+## 🎨 Caractéristiques Techniques
+
+### Responsive Design
+- Interface adaptative desktop/tablet/mobile
+- Sidebar pliable sur mobile
+- Grilles flexibles avec Tailwind CSS
+
+### Performance
+- Chargement API unique avec cache LocalStorage
+- Navigation instantanée sans rechargement
+- Optimisation des rendus DOM
+
+### Accessibilité
+- Navigation au clavier
+- Messages de confirmation pour actions critiques
+- Feedback visuel pour toutes les actions
+
+---
+
+## 🔒 Sécurité & Limitations
+
+### Limitations Client-Side
+- **Pas de vrai serveur** : Toutes les données sont en LocalStorage
+- **Sécurité limitée** : Les mots de passe sont en clair (OK pour un projet front-end)
+- **Fichiers locaux** : `users.json` est en lecture seule (limitation navigateur)
+
+### Pour Production
+Pour un déploiement réel, il faudrait :
+- Un backend (Node.js, PHP, Python)
+- Une vraie base de données (MongoDB, MySQL)
+- Authentification sécurisée (JWT, sessions)
+- API propre avec validation côté serveur
+
+---
+
+## 📚 Technologies Utilisées
+
+| Technologie | Version | Usage |
+|------------|---------|-------|
+| HTML5 | - | Structure sémantique |
+| JavaScript | ES6+ | Logique applicative |
+| Tailwind CSS | 3.x (CDN) | Styling responsive |
+| Chart.js | Latest (CDN) | Graphiques statistiques |
+| FontAwesome | 6.4.0 | Icônes |
+| Studio Ghibli API | v1 | Source de films externe |
+
+---
+
+## 🎓 Objectifs Pédagogiques Atteints
+
+✅ Maîtrise du DOM et manipulation dynamique  
+✅ Gestion d'événements JavaScript avancée  
+✅ Architecture SPA complète sans framework  
+✅ Intégration API REST avec fetch()  
+✅ LocalStorage pour persistance de données  
+✅ Responsive design avec Tailwind CSS  
+✅ Gestion d'état applicatif  
+✅ CRUD complet sur plusieurs entités  
+✅ Système d'authentification client-side  
+✅ Visualisation de données avec Chart.js
+
+---
+
+## 📖 Documentation API
+
+### Studio Ghibli API
+- **Endpoint** : `https://ghibliapi.vercel.app/films`
+- **Méthode** : GET
+- **Format** : JSON
+- **Données récupérées** : Titre, réalisateur, année, note, description, poster
+
+### LocalStorage Structure
+```javascript
+{
+  "cinetech_films": [],           // Films locaux
+  "cinetech_api_films": [],       // Films API (cache)
+  "cinetech_users": [],           // Utilisateurs
+  "cinetech_currentUser": {},     // Session actuelle
+  "cinetech_global_ratings": {},  // Notes globales
+  "cinetech_favs_username": []    // Favoris par user
+}
+```
+
+---
+
+## 👨‍💻 Contributeurs
+
+Ce projet a été développé dans le cadre du module **Développement Web Front-End** par :
+
+- **NIZAR TAOUSSI** - Développement & Architecture
+- **OTHMANE BAZ** - Développement & UI/UX
+- **ANOUAR ELACHGAR** - Développement & Intégrations
+
+**Encadrement** : EMSI Les Orangers  
+**Année** : 2025-2026
+
+---
+
+## 📄 Licence
+
+Projet éducatif - EMSI 2025-2026  
+Tous droits réservés aux contributeurs
+
+---
+
+## 🌟 Points Forts du Projet
+
+1. **Architecture SPA Pure** - Une seule page, navigation fluide
+2. **Dual Layout** - Interface utilisateur et admin dans la même app
+3. **Cache Intelligent** - API appelée une seule fois, données persistantes
+4. **Gestion Hybride** - Films locaux + API dans le même catalogue
+5. **UX Moderne** - Tailwind CSS, animations, feedback visuel
+6. **Code Modulaire** - Fonctions réutilisables, organisation claire
+
+---
+
+**Merci d'avoir consulté notre projet ! 🎬**
