@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineTech - Découvrez le Cinéma</title>
+    <title>CineTech </title>
+    <link rel="icon" type="image/png" href="./assets/logo_white.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -182,10 +183,12 @@
                 <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
                     <div class="p-8 border-b border-slate-50 bg-gradient-to-r from-blue-50 to-purple-50">
                         <div class="flex items-center gap-6">
-                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg" id="profile-avatar"></div>
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg"
+                                id="profile-avatar"></div>
                             <div>
                                 <h3 class="text-3xl font-black text-slate-900" id="profile-username"></h3>
-                                <p class="text-sm text-slate-500 font-bold uppercase tracking-wider" id="profile-role"></p>
+                                <p class="text-sm text-slate-500 font-bold uppercase tracking-wider" id="profile-role">
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -198,13 +201,15 @@
                             </h4>
                             <form id="profile-info-form" class="space-y-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Nom d'utilisateur</label>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Nom
+                                        d'utilisateur</label>
                                     <input type="text" id="profile-edit-username" required
                                         class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold"
                                         placeholder="Votre nom d'utilisateur">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Email (optionnel)</label>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Email
+                                        (optionnel)</label>
                                     <input type="email" id="profile-edit-email"
                                         class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold"
                                         placeholder="votre@email.com">
@@ -223,19 +228,22 @@
                             </h4>
                             <form id="profile-password-form" class="space-y-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Mot de passe actuel</label>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Mot de passe
+                                        actuel</label>
                                     <input type="password" id="profile-current-password" required
                                         class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all font-semibold"
                                         placeholder="••••••••">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Nouveau mot de passe</label>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Nouveau mot de
+                                        passe</label>
                                     <input type="password" id="profile-new-password" required
                                         class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all font-semibold"
                                         placeholder="••••••••">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Confirmer le nouveau mot de passe</label>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Confirmer le
+                                        nouveau mot de passe</label>
                                     <input type="password" id="profile-confirm-password" required
                                         class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all font-semibold"
                                         placeholder="••••••••">
@@ -253,14 +261,22 @@
                                 Couleur de l'avatar
                             </h4>
                             <div class="grid grid-cols-8 gap-3">
-                                <button type="button" onclick="changeAvatarColor('blue')" class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 hover:scale-110 transition-transform shadow-lg"></button>
-                                <button type="button" onclick="changeAvatarColor('purple')" class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 hover:scale-110 transition-transform shadow-lg"></button>
-                                <button type="button" onclick="changeAvatarColor('green')" class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 hover:scale-110 transition-transform shadow-lg"></button>
-                                <button type="button" onclick="changeAvatarColor('red')" class="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 hover:scale-110 transition-transform shadow-lg"></button>
-                                <button type="button" onclick="changeAvatarColor('yellow')" class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hover:scale-110 transition-transform shadow-lg"></button>
-                                <button type="button" onclick="changeAvatarColor('pink')" class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 hover:scale-110 transition-transform shadow-lg"></button>
-                                <button type="button" onclick="changeAvatarColor('indigo')" class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 hover:scale-110 transition-transform shadow-lg"></button>
-                                <button type="button" onclick="changeAvatarColor('teal')" class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('blue')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('purple')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('green')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('red')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('yellow')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('pink')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('indigo')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 hover:scale-110 transition-transform shadow-lg"></button>
+                                <button type="button" onclick="changeAvatarColor('teal')"
+                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 hover:scale-110 transition-transform shadow-lg"></button>
                             </div>
                         </div>
 
@@ -272,7 +288,8 @@
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div class="text-center">
                                     <p class="text-3xl font-black text-blue-600" id="profile-favs-count">0</p>
-                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Favoris</p>
+                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Favoris
+                                    </p>
                                 </div>
                                 <div class="text-center">
                                     <p class="text-3xl font-black text-purple-600" id="profile-ratings-count">0</p>
@@ -284,7 +301,8 @@
                                 </div>
                                 <div class="text-center">
                                     <p class="text-3xl font-black text-orange-600" id="profile-avg-rating">0</p>
-                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Moy. Notes</p>
+                                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Moy. Notes
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -412,9 +430,11 @@
         <!-- Admin Directors Section -->
         <section id="section-directors" class="page-section hidden pt-10">
             <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-100 pb-4 gap-4">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-100 pb-4 gap-4">
                     <div>
-                        <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Répertoire des Réalisateurs</h3>
+                        <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Répertoire des
+                            Réalisateurs</h3>
                         <p class="text-sm text-slate-400 mt-1">Gérez vos réalisateurs et leurs films.</p>
                     </div>
                     <div class="flex gap-2">

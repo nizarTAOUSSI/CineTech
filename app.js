@@ -51,7 +51,7 @@ let films = [...localFilms, ...apiFilms];
 
 async function fetchFilmsFromAPI() {
     const cachedApiFilms = localStorage.getItem('cinetech_api_films');
-    
+
     if (cachedApiFilms) {
         apiFilms = JSON.parse(cachedApiFilms);
         films = [...localFilms, ...apiFilms];
@@ -60,13 +60,13 @@ async function fetchFilmsFromAPI() {
         if (document.getElementById('section-films')) renderAdminFilms();
         return;
     }
-    
+
     const apiURL = 'https://ghibliapi.vercel.app/films';
     try {
         const response = await fetch(apiURL);
         if (!response.ok) throw new Error('Network response was not ok');
         const ghibliFilms = await response.json();
-        
+
         apiFilms = ghibliFilms.map(m => ({
             id: m.id,
             title: m.title || m.original_title,
@@ -74,13 +74,13 @@ async function fetchFilmsFromAPI() {
             year: m.release_date || 'N/A',
             genre: 'Animation/Fantasy',
             director: m.director || 'Unknown',
-            rating: parseFloat(m.rt_score) / 10 || 8.5, 
+            rating: parseFloat(m.rt_score) / 10 || 8.5,
             overview: m.description || 'A beautiful Studio Ghibli film.',
             isExternal: true
         }));
-        
+
         localStorage.setItem('cinetech_api_films', JSON.stringify(apiFilms));
-        
+
         films = [...localFilms, ...apiFilms];
         renderCatalog();
         renderFavorites();
@@ -221,10 +221,10 @@ function closeFilmModal() {
 function deleteFilm(id) {
     const film = films.find(f => f.id === id);
     if (!film) return;
-    
+
     const confirmMsg = film.isExternal ? "Masquer ce film API du catalogue ?" : "Supprimer ce film local ?";
     if (!confirm(confirmMsg)) return;
-    
+
     if (film.isExternal) {
         apiFilms = apiFilms.filter(f => f.id != id);
         localStorage.setItem('cinetech_api_films', JSON.stringify(apiFilms));
@@ -232,7 +232,7 @@ function deleteFilm(id) {
         localFilms = localFilms.filter(f => f.id != id);
         saveFilms();
     }
-    
+
     films = [...localFilms, ...apiFilms];
     renderAdminFilms();
     renderCatalog();
@@ -649,7 +649,7 @@ function deleteDirector(name) {
     localFilms = localFilms.filter(f => f.director !== name);
     saveFilms();
     films = [...localFilms, ...apiFilms];
-    
+
     renderDirectors();
     renderCatalog();
     renderAdminFilms();
@@ -735,7 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (id) {
                 const existingFilm = films.find(f => f.id === id);
                 const localIdx = localFilms.findIndex(f => f.id === id);
-                
+
                 if (localIdx !== -1) {
                     localFilms[localIdx] = { ...localFilms[localIdx], ...filmData };
                 } else if (wasExternal) {
@@ -744,13 +744,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         apiFilms.splice(apiIdx, 1);
                         localStorage.setItem('cinetech_api_films', JSON.stringify(apiFilms));
                     }
-                    localFilms.unshift({ 
-                        id, 
+                    localFilms.unshift({
+                        id,
                         ...filmData,
                         overview: existingFilm?.overview || ''
                     });
                 }
-                
+
                 saveFilms();
                 films = [...localFilms, ...apiFilms];
             } else {
@@ -788,12 +788,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     return f;
                 });
-                
+
                 if (updated) {
                     saveFilms();
                     films = [...localFilms, ...apiFilms];
-                    
-                    
+
+
                     renderDirectors();
                     renderAdminFilms();
                     renderCatalog();
@@ -932,7 +932,7 @@ function updateUIAuth() {
         authBtns.classList.add('hidden');
         userProfile.classList.remove('hidden');
         document.getElementById('nav-username').innerText = user.username;
-        
+
         const avatarColor = user.avatarColor || 'blue';
         const navAvatar = document.getElementById('nav-avatar');
         navAvatar.innerText = user.username.charAt(0).toUpperCase();
@@ -961,7 +961,7 @@ const originalNavigateTo = window.navigateTo;
 window.navigateTo = function (section) {
     const user = JSON.parse(localStorage.getItem('cinetech_currentUser'));
     const isAdminSection = ['dashboard', 'films', 'directors', 'users'].includes(section);
-    
+
     if ((section === 'favorites' || section === 'profile') && !user) {
         openLoginModal();
         return;
@@ -974,10 +974,10 @@ window.navigateTo = function (section) {
     }
 
     document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-    
+
     const target = document.getElementById(`section-${section}`);
     if (target) target.classList.remove('hidden');
-    
+
     if (user && user.role === 'admin') {
         document.querySelectorAll('.sidebar-nav-link').forEach(l => {
             l.classList.remove('bg-blue-600', 'text-white');
@@ -1004,10 +1004,10 @@ window.navigateTo = function (section) {
     const mainContent = document.querySelector('main');
     const mainNav = document.getElementById('main-nav');
     const adminSidebar = document.getElementById('admin-sidebar');
-    
+
     if (section === 'catalog') {
         if (mainHero) mainHero.classList.remove('hidden');
-        
+
         if (user && user.role === 'admin') {
             adminSidebar.classList.add('hidden');
             adminSidebar.classList.remove('flex');
@@ -1017,7 +1017,7 @@ window.navigateTo = function (section) {
         }
     } else {
         if (mainHero) mainHero.classList.add('hidden');
-        
+
         if (user && user.role === 'admin' && isAdminSection) {
             adminSidebar.classList.remove('hidden');
             adminSidebar.classList.add('flex');
@@ -1109,7 +1109,7 @@ function renderProfile() {
 
     document.getElementById('profile-username').innerText = user.username;
     document.getElementById('profile-role').innerText = user.role === 'admin' ? 'Administrateur' : 'Membre';
-    
+
     const avatarColor = user.avatarColor || 'blue';
     const profileAvatar = document.getElementById('profile-avatar');
     profileAvatar.innerText = user.username.charAt(0).toUpperCase();
@@ -1151,7 +1151,7 @@ if (profileInfoForm) {
 
         let users = JSON.parse(localStorage.getItem('cinetech_users')) || [];
         const existingUser = users.find(u => u.username.toLowerCase() === newUsername.toLowerCase() && u.id !== user.id);
-        
+
         if (existingUser) {
             alert('Ce nom d\'utilisateur est déjà pris');
             return;
@@ -1165,7 +1165,7 @@ if (profileInfoForm) {
         });
 
         localStorage.setItem('cinetech_users', JSON.stringify(users));
-        
+
         const updatedUser = users.find(u => u.id === user.id);
         localStorage.setItem('cinetech_currentUser', JSON.stringify(updatedUser));
 
@@ -1209,7 +1209,7 @@ if (profilePasswordForm) {
         });
 
         localStorage.setItem('cinetech_users', JSON.stringify(users));
-        
+
         const updatedUser = users.find(u => u.id === user.id);
         localStorage.setItem('cinetech_currentUser', JSON.stringify(updatedUser));
 
@@ -1218,7 +1218,7 @@ if (profilePasswordForm) {
     };
 }
 
-window.changeAvatarColor = function(color) {
+window.changeAvatarColor = function (color) {
     const user = getCurrentUser();
     if (!user) return;
 
@@ -1231,7 +1231,7 @@ window.changeAvatarColor = function(color) {
     });
 
     localStorage.setItem('cinetech_users', JSON.stringify(users));
-    
+
     const updatedUser = users.find(u => u.id === user.id);
     localStorage.setItem('cinetech_currentUser', JSON.stringify(updatedUser));
 
