@@ -49,30 +49,46 @@ function initUserStorage() {
     }
 }
 let localFilms = JSON.parse(localStorage.getItem('cinetech_films')) || [];
-let films = [...localFilms];
+let apiFilms = JSON.parse(localStorage.getItem('cinetech_api_films')) || [];
+let films = [...localFilms, ...apiFilms];
+
 async function fetchFilmsFromAPI() {
-    const apiURL = 'https:jsonfakery.com/movies/paginated';
+    const cachedApiFilms = localStorage.getItem('cinetech_api_films');
+    
+    if (cachedApiFilms) {
+        apiFilms = JSON.parse(cachedApiFilms);
+        films = [...localFilms, ...apiFilms];
+        renderCatalog();
+        renderFavorites();
+        if (document.getElementById('section-films')) renderAdminFilms();
+        return;
+    }
+    
+    const apiURL = 'https://ghibliapi.vercel.app/films';
     try {
         const response = await fetch(apiURL);
         if (!response.ok) throw new Error('Network response was not ok');
-        const result = await response.json();
-        const apiFilms = result.data.map(m => ({
+        const ghibliFilms = await response.json();
+        
+        apiFilms = ghibliFilms.map(m => ({
             id: m.id,
-            title: m.original_title,
-            poster: m.poster_path,
-            year: m.release_date ? m.release_date.split('/').pop() : 'N/A',
-            genre: 'Action/Drama',
-            director: m.casts && m.casts.length > 0 ? m.casts[0].name : 'Unknown',
-            rating: m.vote_average,
-            overview: m.overview,
+            title: m.title || m.original_title,
+            poster: m.image || m.movie_banner || 'https://via.placeholder.com/300x450?text=Studio+Ghibli',
+            year: m.release_date || 'N/A',
+            genre: 'Animation/Fantasy',
+            director: m.director || 'Unknown',
+            rating: parseFloat(m.rt_score) / 10 || 8.5, 
+            overview: m.description || 'A beautiful Studio Ghibli film.',
             isExternal: true
         }));
+        
+        localStorage.setItem('cinetech_api_films', JSON.stringify(apiFilms));
+        
         films = [...localFilms, ...apiFilms];
         renderCatalog();
         renderFavorites();
         if (document.getElementById('section-films')) renderAdminFilms();
     } catch (error) {
-        console.warn("Fetch failed, using ONLY local films:", error);
         films = [...localFilms];
         renderCatalog();
         renderFavorites();
@@ -104,16 +120,14 @@ function renderAdminFilms() {
                  </span>
              </td>
              <td class="p-3 text-center" onclick="event.stopPropagation()">
-                 ${film.isExternal ? '<span class="text-gray-300">-</span>' : `
                  <div class="flex justify-center gap-1">
-                     <button onclick="editFilm('${film.id}')" class="text-blue-400 hover:text-blue-600 p-2">
+                     <button onclick="editFilm('${film.id}')" class="text-blue-400 hover:text-blue-600 p-2" title="${film.isExternal ? 'Éditer (convertira en film local)' : 'Éditer'}">
                          <i class="fas fa-edit"></i>
                      </button>
-                     <button onclick="deleteFilm('${film.id}')" class="text-red-400 hover:text-red-600 p-2">
-                         <i class="fas fa-trash"></i>
+                     <button onclick="deleteFilm('${film.id}')" class="text-red-400 hover:text-red-600 p-2" title="${film.isExternal ? 'Masquer ce film' : 'Supprimer'}">
+                         <i class="fas fa-trash-alt"></i>
                      </button>
                  </div>
-                 `}
              </td>
          </tr>
          `;
@@ -127,14 +141,14 @@ function renderAdminDashboard() {
 
     if (!kpiFilms) return;
 
-    kpiFilms.innerText = localFilms.length;
+    kpiFilms.innerText = films.length;
 
-    const uniqueDirectors = [...new Set(localFilms.map(f => f.director))];
+    const uniqueDirectors = [...new Set(films.map(f => f.director))];
     kpiDirectors.innerText = uniqueDirectors.length;
 
-    if (localFilms.length > 0) {
-        const totalAvg = localFilms.reduce((sum, f) => sum + getAverageRating(f.id), 0);
-        const finalAvg = (totalAvg / localFilms.length).toFixed(1);
+    if (films.length > 0) {
+        const totalAvg = films.reduce((sum, f) => sum + getAverageRating(f.id), 0);
+        const finalAvg = (totalAvg / films.length).toFixed(1);
         kpiRating.innerText = `${finalAvg} / 10`;
     } else {
         kpiRating.innerText = "0 / 10";
@@ -147,7 +161,7 @@ function renderAdminDashboard() {
         }
 
         const genreCounts = {};
-        localFilms.forEach(f => {
+        films.forEach(f => {
             genreCounts[f.genre] = (genreCounts[f.genre] || 0) + 1;
         });
 
@@ -193,6 +207,7 @@ function prepareAddFilm() {
     document.getElementById('film-form').reset();
     document.getElementById('film-id').value = "";
     document.getElementById('film-rating').value = 0;
+    document.getElementById('film-is-external').value = 'false';
     openFilmModal();
 }
 
@@ -207,10 +222,21 @@ function closeFilmModal() {
 }
 
 function deleteFilm(id) {
-    if (!confirm("Supprimer ce film local ?")) return;
-    localFilms = localFilms.filter(f => f.id != id);
-    films = films.filter(f => f.id != id);
-    saveFilms();
+    const film = films.find(f => f.id === id);
+    if (!film) return;
+    
+    const confirmMsg = film.isExternal ? "Masquer ce film API du catalogue ?" : "Supprimer ce film local ?";
+    if (!confirm(confirmMsg)) return;
+    
+    if (film.isExternal) {
+        apiFilms = apiFilms.filter(f => f.id != id);
+        localStorage.setItem('cinetech_api_films', JSON.stringify(apiFilms));
+    } else {
+        localFilms = localFilms.filter(f => f.id != id);
+        saveFilms();
+    }
+    
+    films = [...localFilms, ...apiFilms];
     renderAdminFilms();
     renderCatalog();
     renderAdminDashboard();
@@ -475,7 +501,6 @@ function updateUserRole(id, newRole) {
     if (idx > -1) {
         users[idx].role = newRole;
         localStorage.setItem('cinetech_users', JSON.stringify(users));
-        console.log(`Rôle de l'utilisateur ${id} mis à jour en ${newRole}`);
     }
 }
 
@@ -527,11 +552,16 @@ function renderDirectors() {
     if (!list) return;
 
     const directorsMap = {};
-    localFilms.forEach(f => {
+    films.forEach(f => {
         if (!directorsMap[f.director]) {
-            directorsMap[f.director] = 0;
+            directorsMap[f.director] = { total: 0, local: 0, api: 0 };
         }
-        directorsMap[f.director]++;
+        directorsMap[f.director].total++;
+        if (f.isExternal) {
+            directorsMap[f.director].api++;
+        } else {
+            directorsMap[f.director].local++;
+        }
     });
 
     const directorNames = Object.keys(directorsMap);
@@ -540,7 +570,7 @@ function renderDirectors() {
         list.innerHTML = `
              <div class="col-span-full p-8 bg-white rounded-xl border-2 border-dashed border-gray-200 text-center">
                  <i class="fas fa-user-tie text-4xl text-gray-200 mb-3"></i>
-                 <p class="text-gray-500">Aucun réalisateur trouvé dans vos films locaux.</p>
+                 <p class="text-gray-500">Aucun réalisateur trouvé.</p>
              </div>
          `;
         return;
@@ -548,7 +578,9 @@ function renderDirectors() {
 
     list.innerHTML = "";
     directorNames.forEach(name => {
-        const count = directorsMap[name];
+        const count = directorsMap[name].total;
+        const localCount = directorsMap[name].local;
+        const apiCount = directorsMap[name].api;
         list.innerHTML += `
          <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-shadow">
              <div class="flex items-center gap-4">
@@ -557,7 +589,7 @@ function renderDirectors() {
                  </div>
                  <div class="cursor-pointer" onclick="openDirectorModal('${name.replace(/'/g, "\\'")}')">
                      <h4 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">${name}</h4>
-                     <p class="text-xs text-gray-400 font-medium uppercase">${count} Film${count > 1 ? 's' : ''} local</p>
+                     <p class="text-xs text-gray-400 font-medium uppercase">${count} Film${count > 1 ? 's' : ''} ${localCount > 0 && apiCount > 0 ? `(${localCount} local, ${apiCount} API)` : localCount > 0 ? 'local' : 'API'}</p>
                  </div>
              </div>
              <div class="flex gap-1">
@@ -596,10 +628,10 @@ window.openDirectorModal = openDirectorModal;
 window.closeDirectorModal = closeDirectorModal;
 
 function editFilm(id) {
-    const film = localFilms.find(f => f.id === id);
+    const film = films.find(f => f.id === id);
     if (!film) return;
 
-    document.getElementById('modal-title').innerText = "Modifier le Film";
+    document.getElementById('modal-title').innerText = film.isExternal ? "Éditer le Film (Sera converti en local)" : "Modifier le Film";
     document.getElementById('film-id').value = film.id;
     document.getElementById('film-title').value = film.title;
     document.getElementById('film-director').value = film.director;
@@ -607,6 +639,7 @@ function editFilm(id) {
     document.getElementById('film-genre').value = film.genre;
     document.getElementById('film-rating').value = film.rating || 0;
     document.getElementById('film-poster').value = film.poster.includes('placeholder') ? "" : film.poster;
+    document.getElementById('film-is-external').value = film.isExternal ? 'true' : 'false';
 
     openFilmModal();
 }
@@ -614,12 +647,12 @@ function editFilm(id) {
 window.editFilm = editFilm;
 
 function deleteDirector(name) {
-    if (!confirm(`TÊTES-VOUS SÛR ? Supprimer le réalisateur "${name}" supprimera également TOUS ses films associés de votre catalogue local.`)) return;
+    if (!confirm(`ÊTES-VOUS SÛR ? Supprimer le réalisateur "${name}" supprimera également TOUS ses films associés de votre catalogue local.`)) return;
 
     localFilms = localFilms.filter(f => f.director !== name);
-    films = films.filter(f => f.director !== name);
-
     saveFilms();
+    films = [...localFilms, ...apiFilms];
+    
     renderDirectors();
     renderCatalog();
     renderAdminFilms();
@@ -650,7 +683,6 @@ async function initUsers() {
             localStorage.setItem('cinetech_users', JSON.stringify(localUsers));
         }
     } catch (error) {
-        console.warn("Manual users sync failed:", error);
         if (!localStorage.getItem('cinetech_users')) {
             const defaults = [
                 { id: 1, username: 'admin', role: 'admin', password: 'admin', createdAt: new Date().toISOString() },
@@ -695,6 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const id = document.getElementById('film-id').value;
             const customPoster = document.getElementById('film-poster').value;
+            const wasExternal = document.getElementById('film-is-external')?.value === 'true';
 
             const filmData = {
                 title: document.getElementById('film-title').value,
@@ -707,12 +740,26 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             if (id) {
-                const idx = localFilms.findIndex(f => f.id === id);
-                if (idx !== -1) {
-                    localFilms[idx] = { ...localFilms[idx], ...filmData };
-                    const mainIdx = films.findIndex(f => f.id === id);
-                    if (mainIdx !== -1) films[mainIdx] = localFilms[idx];
+                const existingFilm = films.find(f => f.id === id);
+                const localIdx = localFilms.findIndex(f => f.id === id);
+                
+                if (localIdx !== -1) {
+                    localFilms[localIdx] = { ...localFilms[localIdx], ...filmData };
+                } else if (wasExternal) {
+                    const apiIdx = apiFilms.findIndex(f => f.id === id);
+                    if (apiIdx !== -1) {
+                        apiFilms.splice(apiIdx, 1);
+                        localStorage.setItem('cinetech_api_films', JSON.stringify(apiFilms));
+                    }
+                    localFilms.unshift({ 
+                        id, 
+                        ...filmData,
+                        overview: existingFilm?.overview || ''
+                    });
                 }
+                
+                saveFilms();
+                films = [...localFilms, ...apiFilms];
             } else {
                 const newFilm = { id: Date.now().toString(), ...filmData };
                 localFilms.unshift(newFilm);
@@ -734,17 +781,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const oldName = document.getElementById('old-director-name').value;
             const newName = document.getElementById('new-director-name').value.trim();
 
-            if (oldName && newName && oldName !== newName) {
-                localFilms.forEach(f => {
-                    if (f.director === oldName) f.director = newName;
+            if (!oldName || !newName) {
+                alert("Veuillez remplir tous les champs");
+                return;
+            }
+
+            if (oldName !== newName) {
+                let updated = false;
+                localFilms = localFilms.map(f => {
+                    if (f.director === oldName) {
+                        updated = true;
+                        return { ...f, director: newName };
+                    }
+                    return f;
                 });
-                films.forEach(f => {
-                    if (f.director === oldName) f.director = newName;
-                });
-                saveFilms();
-                renderDirectors();
-                renderAdminFilms();
-                renderCatalog();
+                
+                if (updated) {
+                    saveFilms();
+                    films = [...localFilms, ...apiFilms];
+                    
+                    
+                    renderDirectors();
+                    renderAdminFilms();
+                    renderCatalog();
+                    renderAdminDashboard();
+                }
             }
             closeDirectorModal();
         });
