@@ -23,7 +23,7 @@
 
 <body class="bg-gray-50 text-slate-900">
 
-    
+
     <nav class="fixed top-0 w-full z-40 glass border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -42,6 +42,10 @@
                     <a href="#favorites" id="nav-favorites" onclick="navigateTo('favorites')"
                         class="nav-link hidden text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">Mes
                         Favoris</a>
+                    <a href="admin.html" id="nav-admin"
+                        class="hidden text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors">
+                        <i class="fas fa-user-shield mr-1"></i> Dashboard Admin
+                    </a>
                 </div>
 
                 <div class="flex items-center gap-4">
@@ -74,7 +78,7 @@
         </div>
     </nav>
 
-    
+
     <header id="main-hero" class="pt-32 pb-20 px-4">
         <div class="max-w-5xl mx-auto text-center">
             <span
@@ -98,9 +102,9 @@
         </div>
     </header>
 
-    
+
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        
+
         <section id="section-catalog" class="page-section pt-10">
             <div class="flex items-center justify-between mb-10">
                 <h2 class="text-3xl font-black text-slate-900">En ce moment</h2>
@@ -108,11 +112,11 @@
             </div>
 
             <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                
+
             </div>
         </section>
 
-        
+
         <section id="section-favorites" class="page-section hidden pt-10">
             <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
                 <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
@@ -150,7 +154,7 @@
         </section>
     </main>
 
-    
+
     <div id="login-modal"
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-md hidden items-center justify-center z-50 p-4">
         <div
@@ -217,7 +221,7 @@
         </div>
     </div>
 
-    
+
     <div id="movie-detail-modal"
         class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center z-[100] p-4">
         <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
@@ -229,7 +233,7 @@
         </div>
     </div>
 
-    
+
     <div id="section-dashboard" class="hidden"></div>
     <div id="section-films" class="hidden"></div>
     <div id="section-directors" class="hidden"></div>
@@ -301,16 +305,18 @@
                 document.getElementById('nav-avatar').innerText = user.username.charAt(0).toUpperCase();
 
                 const roleEl = document.getElementById('nav-role');
-                if (user.role === 'admin') {
-                    roleEl.innerText = "Admin";
-                    roleEl.className = "text-[10px] text-purple-500 font-bold uppercase tracking-wider";
-                } else {
+                if (roleEl) {
                     roleEl.innerText = "Membre";
                     roleEl.className = "text-[10px] text-slate-400 font-bold uppercase tracking-wider";
                 }
 
                 const favLink = document.getElementById('nav-favorites');
                 if (favLink) favLink.classList.remove('hidden');
+
+                if (user.role === 'admin') {
+                    const adminLink = document.getElementById('nav-admin');
+                    if (adminLink) adminLink.classList.remove('hidden');
+                }
             }
         }
 
@@ -377,8 +383,7 @@
                 localStorage.setItem('cinetech_currentUser', JSON.stringify(user));
                 showMessage("Connexion réussie !");
                 setTimeout(() => {
-                    if (user.role === 'admin') window.location.href = 'admin.html';
-                    else window.location.reload();
+                    window.location.reload();
                 }, 1000);
             } else {
                 showMessage("Identifiants incorrects", true);

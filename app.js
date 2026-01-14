@@ -51,7 +51,7 @@ function initUserStorage() {
 let localFilms = JSON.parse(localStorage.getItem('cinetech_films')) || [];
 let films = [...localFilms];
 async function fetchFilmsFromAPI() {
-    const apiURL = 'https://jsonfakery.com/movies/paginated';
+    const apiURL = 'https:jsonfakery.com/movies/paginated';
     try {
         const response = await fetch(apiURL);
         if (!response.ok) throw new Error('Network response was not ok');
@@ -91,32 +91,32 @@ function renderAdminFilms() {
 
     films.forEach(film => {
         tbody.innerHTML += `
-        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-            <td class="p-3"><img src="${film.poster}" class="w-10 h-14 object-cover rounded shadow-sm" onerror="this.src='https://via.placeholder.com/100x150?text=X'"></td>
-            <td class="p-3 font-medium text-gray-900">${film.title}</td>
-            <td class="p-3 text-gray-500">${film.director}</td>
-            <td class="p-3 text-gray-500">${film.year}</td>
-            <td class="p-3 text-gray-500">${film.genre}</td>
-            <td class="p-3 text-blue-600 font-bold">★ ${getAverageRating(film.id)}</td>
-            <td class="p-3">
-                <span class="text-xs px-2 py-1 rounded ${film.isExternal ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'} font-bold">
-                    ${film.isExternal ? 'API' : 'LOCAL'}
-                </span>
-            </td>
-            <td class="p-3 text-center">
-                ${film.isExternal ? '<span class="text-gray-300">-</span>' : `
-                <div class="flex justify-center gap-1">
-                    <button onclick="editFilm('${film.id}')" class="text-blue-400 hover:text-blue-600 p-2">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="deleteFilm('${film.id}')" class="text-red-400 hover:text-red-600 p-2">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-                `}
-            </td>
-        </tr>
-        `;
+         <tr onclick="showMovieDetail('${film.id}')" class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
+             <td class="p-3"><img src="${film.poster}" class="w-10 h-14 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" onerror="this.src='https:via.placeholder.com/100x150?text=X'"></td>
+             <td class="p-3 font-medium text-gray-900">${film.title}</td>
+             <td class="p-3 text-gray-500">${film.director}</td>
+             <td class="p-3 text-gray-500">${film.year}</td>
+             <td class="p-3 text-gray-500">${film.genre}</td>
+             <td class="p-3 text-blue-600 font-bold">★ ${getAverageRating(film.id)}</td>
+             <td class="p-3">
+                 <span class="text-xs px-2 py-1 rounded ${film.isExternal ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'} font-bold">
+                     ${film.isExternal ? 'API' : 'LOCAL'}
+                 </span>
+             </td>
+             <td class="p-3 text-center" onclick="event.stopPropagation()">
+                 ${film.isExternal ? '<span class="text-gray-300">-</span>' : `
+                 <div class="flex justify-center gap-1">
+                     <button onclick="editFilm('${film.id}')" class="text-blue-400 hover:text-blue-600 p-2">
+                         <i class="fas fa-edit"></i>
+                     </button>
+                     <button onclick="deleteFilm('${film.id}')" class="text-red-400 hover:text-red-600 p-2">
+                         <i class="fas fa-trash"></i>
+                     </button>
+                 </div>
+                 `}
+             </td>
+         </tr>
+         `;
     });
 }
 
@@ -264,29 +264,27 @@ function renderCatalog() {
         const avgRating = getAverageRating(film.id);
 
         grid.innerHTML += `
-        <div onclick="showMovieDetail('${film.id}')" class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer">
-            <div class="relative overflow-hidden aspect-[2/3]">
-                <img src="${film.poster}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                     <p class="text-white text-xs line-clamp-3">${film.overview || ''}</p>
-                </div>
-                ${!isAdmin ? `
-                <button onclick="event.stopPropagation(); toggleFavorite('${film.id}')"
-                    class="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur shadow-md flex items-center justify-center transition-all hover:scale-110 hover:bg-white active:scale-95 z-10">
-                    <i class="${isFav ? 'fas text-red-500' : 'far text-gray-400'} fa-heart"></i>
-                </button>
-                ` : ''}
-            </div>
-            <div class="p-4">
-                <div class="flex justify-between items-start mb-1">
-                    <h4 class="font-bold text-gray-900 truncate flex-1 pr-2">${film.title}</h4>
-                    <span class="text-blue-600 font-semibold text-sm">★ ${avgRating}</span>
-                </div>
-                <p class="text-[11px] font-bold text-blue-500/80 uppercase mb-1">${film.director}</p>
-                <p class="text-xs text-gray-500">${film.genre} • ${film.year}</p>
-            </div>
-        </div>
-        `;
+         <div onclick="showMovieDetail('${film.id}')" class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer">
+             <div class="relative overflow-hidden aspect-[2/3]">
+                 <img src="${film.poster}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https:via.placeholder.com/300x450?text=No+Poster'">
+                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                      <p class="text-white text-xs line-clamp-3">${film.overview || ''}</p>
+                 </div>
+                 <button onclick="event.stopPropagation(); toggleFavorite('${film.id}')"
+                     class="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur shadow-md flex items-center justify-center transition-all hover:scale-110 hover:bg-white active:scale-95 z-10">
+                     <i class="${isFav ? 'fas text-red-500' : 'far text-gray-400'} fa-heart"></i>
+                 </button>
+             </div>
+             <div class="p-4">
+                 <div class="flex justify-between items-start mb-1">
+                     <h4 class="font-bold text-gray-900 truncate flex-1 pr-2">${film.title}</h4>
+                     <span class="text-blue-600 font-semibold text-sm">★ ${avgRating}</span>
+                 </div>
+                 <p class="text-[11px] font-bold text-blue-500/80 uppercase mb-1">${film.director}</p>
+                 <p class="text-xs text-gray-500">${film.genre} • ${film.year}</p>
+             </div>
+         </div>
+         `;
     });
 }
 
@@ -301,36 +299,36 @@ function renderFavorites() {
 
     if (favFilms.length === 0) {
         tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-8 text-gray-400">
-                    <div class="flex flex-col items-center">
-                        <i class="far fa-heart text-4xl mb-2 opacity-20"></i>
-                        <p>Aucun film favori pour le moment</p>
-                    </div>
-                </td>
-            </tr>
-        `;
+             <tr>
+                 <td colspan="7" class="text-center py-8 text-gray-400">
+                     <div class="flex flex-col items-center">
+                         <i class="far fa-heart text-4xl mb-2 opacity-20"></i>
+                         <p>Aucun film favori pour le moment</p>
+                     </div>
+                 </td>
+             </tr>
+         `;
         return;
     }
 
     favFilms.forEach(film => {
         tbody.innerHTML += `
-        <tr onclick="showMovieDetail('${film.id}')" class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-            <td class="p-3"><img src="${film.poster}" class="w-12 h-16 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" onerror="this.src='https://via.placeholder.com/100x150?text=X'"></td>
-            <td class="p-3 font-medium text-gray-900">${film.title}</td>
-            <td class="p-3 text-gray-600">${film.director}</td>
-            <td class="p-3 text-gray-600">${film.year}</td>
-            <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full uppercase font-bold">${film.genre}</span></td>
-            <td class="p-3"><span class="font-semibold text-blue-600">★ ${film.rating}</span></td>
-            <td class="p-3 text-center" onclick="event.stopPropagation()">
-                <button onclick="toggleFavorite('${film.id}')"
-                    class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto"
-                    title="Retirer des favoris">
-                    <i class="fas fa-trash-alt text-sm"></i>
-                </button>
-            </td>
-        </tr>
-        `;
+         <tr onclick="showMovieDetail('${film.id}')" class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
+             <td class="p-3"><img src="${film.poster}" class="w-12 h-16 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" onerror="this.src='https:via.placeholder.com/100x150?text=X'"></td>
+             <td class="p-3 font-medium text-gray-900">${film.title}</td>
+             <td class="p-3 text-gray-600">${film.director}</td>
+             <td class="p-3 text-gray-600">${film.year}</td>
+             <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full uppercase font-bold">${film.genre}</span></td>
+             <td class="p-3"><span class="font-semibold text-blue-600">★ ${film.rating}</span></td>
+             <td class="p-3 text-center" onclick="event.stopPropagation()">
+                 <button onclick="toggleFavorite('${film.id}')"
+                     class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto"
+                     title="Retirer des favoris">
+                     <i class="fas fa-trash-alt text-sm"></i>
+                 </button>
+             </td>
+         </tr>
+         `;
     });
 }
 
@@ -343,52 +341,52 @@ function showMovieDetail(id) {
     if (!modal || !content) return;
 
     content.innerHTML = `
-        <div class="md:w-1/3">
-            <img src="${film.poster}" class="w-full h-full object-cover rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none" onerror="this.src='https://via.placeholder.com/400x600?text=No+Poster'">
-        </div>
-        <div class="md:w-2/3 p-8 flex flex-col justify-center">
-            <div class="mb-4">
-                <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-bold uppercase tracking-wider">${film.genre}</span>
-                <span class="ml-3 text-gray-400 font-medium">${film.year}</span>
-            </div>
-            <h2 class="text-4xl font-black text-gray-900 mb-2">${film.title}</h2>
-            <p class="text-blue-600 font-bold mb-2 flex items-center gap-2">
-                <i class="fas fa-star text-yellow-500"></i> Note Moyenne: <span id="detail-rating-value">${getAverageRating(film.id)}</span> / 10
-            </p>
+         <div class="md:w-1/3">
+             <img src="${film.poster}" class="w-full h-full object-cover rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none" onerror="this.src='https:via.placeholder.com/400x600?text=No+Poster'">
+         </div>
+         <div class="md:w-2/3 p-8 flex flex-col justify-center">
+             <div class="mb-4">
+                 <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-bold uppercase tracking-wider">${film.genre}</span>
+                 <span class="ml-3 text-gray-400 font-medium">${film.year}</span>
+             </div>
+             <h2 class="text-4xl font-black text-gray-900 mb-2">${film.title}</h2>
+             <p class="text-blue-600 font-bold mb-2 flex items-center gap-2">
+                 <i class="fas fa-star text-yellow-500"></i> Note Moyenne: <span id="detail-rating-value">${getAverageRating(film.id)}</span> / 10
+             </p>
             
-            <!-- Star Rating System -->
-            <div class="flex items-center gap-1 mb-6" id="star-rating-container">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Votre Note :</span>
-                <div class="flex flex-row-reverse">
-                    ${[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(i => {
+             <!-- Star Rating System -->
+             <div class="flex items-center gap-1 mb-6" id="star-rating-container">
+                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Votre Note :</span>
+                 <div class="flex flex-row-reverse">
+                     ${[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(i => {
         const userScore = getUserRating(film.id);
         return `
-                        <input type="radio" id="star${i}-${film.id}" name="rating" value="${i}" class="hidden peer" ${Math.round(userScore) === i ? 'checked' : ''} />
-                        <label for="star${i}-${film.id}" onclick="rateMovie('${film.id}', ${i})" class="cursor-pointer text-slate-200 peer-hover:text-yellow-400 peer-checked:text-yellow-500 hover:scale-125 transition-all px-0.5">
-                            <i class="fas fa-star text-base"></i>
-                        </label>
-                    `;
+                         <input type="radio" id="star${i}-${film.id}" name="rating" value="${i}" class="hidden peer" ${Math.round(userScore) === i ? 'checked' : ''} />
+                         <label for="star${i}-${film.id}" onclick="rateMovie('${film.id}', ${i})" class="cursor-pointer text-slate-200 peer-hover:text-yellow-400 peer-checked:text-yellow-500 hover:scale-125 transition-all px-0.5">
+                             <i class="fas fa-star text-base"></i>
+                         </label>
+                     `;
     }).join('')}
-                </div>
-            </div>
+                 </div>
+             </div>
 
-            <div class="space-y-4 mb-8">
-                <div>
-                    <h4 class="text-xs uppercase font-bold text-gray-400 mb-1">Résumé</h4>
-                    <p class="text-gray-600 leading-relaxed">${film.overview || "Aucun résumé disponible pour ce film."}</p>
-                </div>
-                <div>
-                    <h4 class="text-xs uppercase font-bold text-gray-400 mb-1">Réalisateur</h4>
-                    <p class="text-gray-800 font-semibold">${film.director || 'Inconnu'}</p>
-                </div>
-            </div>
-            <div class="mt-auto flex gap-4">
-                 <button onclick="toggleFavorite('${film.id}'); closeMovieDetail()" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
-                    Ajouter aux Favoris
-                 </button>
-            </div>
-        </div>
-    `;
+             <div class="space-y-4 mb-8">
+                 <div>
+                     <h4 class="text-xs uppercase font-bold text-gray-400 mb-1">Résumé</h4>
+                     <p class="text-gray-600 leading-relaxed">${film.overview || "Aucun résumé disponible pour ce film."}</p>
+                 </div>
+                 <div>
+                     <h4 class="text-xs uppercase font-bold text-gray-400 mb-1">Réalisateur</h4>
+                     <p class="text-gray-800 font-semibold">${film.director || 'Inconnu'}</p>
+                 </div>
+             </div>
+             <div class="mt-auto flex gap-4">
+                  <button onclick="toggleFavorite('${film.id}'); closeMovieDetail()" class="flex-1 ${getFavorites().includes(film.id) ? 'bg-red-500 hover:bg-red-600 shadow-red-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'} text-white py-4 rounded-xl font-bold transition shadow-lg">
+                     ${getFavorites().includes(film.id) ? 'Retirer des Favoris' : 'Ajouter aux Favoris'}
+                  </button>
+             </div>
+         </div>
+     `;
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -438,36 +436,36 @@ function renderUsers() {
         const isSelf = currentAdmin && user.username === currentAdmin.username;
 
         tbody.innerHTML += `
-        <tr class="border-b border-gray-100 hover:bg-slate-50 transition-colors">
-            <td class="p-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold">
-                        ${user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <p class="font-bold text-gray-900">${user.username} ${isSelf ? '<span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-400 ml-2 font-normal">Vous</span>' : ''}</p>
-                        <p class="text-xs text-gray-400">ID: ${user.id}</p>
-                    </div>
-                </div>
-            </td>
-            <td class="p-4">
-                <select onchange="updateUserRole(${user.id}, this.value)" 
-                        ${isSelf ? 'disabled' : ''}
-                        class="bg-white border rounded px-2 py-1 text-sm ${user.role === 'admin' ? 'text-purple-600 font-bold' : 'text-blue-600'}">
-                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>Utilisateur</option>
-                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                </select>
-            </td>
-            <td class="p-4 text-gray-500">${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Ancien compte'}</td>
-            <td class="p-4 text-center">
-                ${isSelf ? '-' : `
-                <button onclick="deleteUser(${user.id})" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-                `}
-            </td>
-        </tr>
-        `;
+         <tr class="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+             <td class="p-4">
+                 <div class="flex items-center gap-3">
+                     <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold">
+                         ${user.username.charAt(0).toUpperCase()}
+                     </div>
+                     <div>
+                         <p class="font-bold text-gray-900">${user.username} ${isSelf ? '<span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-400 ml-2 font-normal">Vous</span>' : ''}</p>
+                         <p class="text-xs text-gray-400">ID: ${user.id}</p>
+                     </div>
+                 </div>
+             </td>
+             <td class="p-4">
+                 <select onchange="updateUserRole(${user.id}, this.value)" 
+                         ${isSelf ? 'disabled' : ''}
+                         class="bg-white border rounded px-2 py-1 text-sm ${user.role === 'admin' ? 'text-purple-600 font-bold' : 'text-blue-600'}">
+                     <option value="user" ${user.role === 'user' ? 'selected' : ''}>Utilisateur</option>
+                     <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                 </select>
+             </td>
+             <td class="p-4 text-gray-500">${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Ancien compte'}</td>
+             <td class="p-4 text-center">
+                 ${isSelf ? '-' : `
+                 <button onclick="deleteUser(${user.id})" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto">
+                     <i class="fas fa-trash-alt"></i>
+                 </button>
+                 `}
+             </td>
+         </tr>
+         `;
     });
 }
 
@@ -540,11 +538,11 @@ function renderDirectors() {
 
     if (directorNames.length === 0) {
         list.innerHTML = `
-            <div class="col-span-full p-8 bg-white rounded-xl border-2 border-dashed border-gray-200 text-center">
-                <i class="fas fa-user-tie text-4xl text-gray-200 mb-3"></i>
-                <p class="text-gray-500">Aucun réalisateur trouvé dans vos films locaux.</p>
-            </div>
-        `;
+             <div class="col-span-full p-8 bg-white rounded-xl border-2 border-dashed border-gray-200 text-center">
+                 <i class="fas fa-user-tie text-4xl text-gray-200 mb-3"></i>
+                 <p class="text-gray-500">Aucun réalisateur trouvé dans vos films locaux.</p>
+             </div>
+         `;
         return;
     }
 
@@ -552,28 +550,28 @@ function renderDirectors() {
     directorNames.forEach(name => {
         const count = directorsMap[name];
         list.innerHTML += `
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-shadow">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
-                    ${name.charAt(0).toUpperCase()}
-                </div>
-                <div class="cursor-pointer" onclick="openDirectorModal('${name.replace(/'/g, "\\'")}')">
-                    <h4 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">${name}</h4>
-                    <p class="text-xs text-gray-400 font-medium uppercase">${count} Film${count > 1 ? 's' : ''} local</p>
-                </div>
-            </div>
-            <div class="flex gap-1">
-                <button onclick="openDirectorModal('${name.replace(/'/g, "\\'")}')" 
-                    class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-blue-500 hover:text-white">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="deleteDirector('${name.replace(/'/g, "\\'")}')" 
-                    class="w-9 h-9 rounded-lg bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-500 hover:text-white">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>
-        </div>
-        `;
+         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-shadow">
+             <div class="flex items-center gap-4">
+                 <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
+                     ${name.charAt(0).toUpperCase()}
+                 </div>
+                 <div class="cursor-pointer" onclick="openDirectorModal('${name.replace(/'/g, "\\'")}')">
+                     <h4 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">${name}</h4>
+                     <p class="text-xs text-gray-400 font-medium uppercase">${count} Film${count > 1 ? 's' : ''} local</p>
+                 </div>
+             </div>
+             <div class="flex gap-1">
+                 <button onclick="openDirectorModal('${name.replace(/'/g, "\\'")}')" 
+                     class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-blue-500 hover:text-white">
+                     <i class="fas fa-edit"></i>
+                 </button>
+                 <button onclick="deleteDirector('${name.replace(/'/g, "\\'")}')" 
+                     class="w-9 h-9 rounded-lg bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-500 hover:text-white">
+                     <i class="fas fa-trash-alt"></i>
+                 </button>
+             </div>
+         </div>
+         `;
     });
 }
 
@@ -672,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFavorites();
 
     const user = getCurrentUser();
-    if (user && user.role === 'admin') {
+    if (user && user.role === 'admin' && window.location.pathname.includes('admin.html')) {
         navigateTo('dashboard');
     } else {
         navigateTo('catalog');
@@ -703,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 director: document.getElementById('film-director').value,
                 year: document.getElementById('film-year').value,
                 genre: document.getElementById('film-genre').value,
-                poster: customPoster || `https://via.placeholder.com/300x450?text=${encodeURIComponent(document.getElementById('film-title').value)}`,
+                poster: customPoster || `https:via.placeholder.com/300x450?text=${encodeURIComponent(document.getElementById('film-title').value)}`,
                 rating: parseFloat(document.getElementById('film-rating').value) || 0,
                 isExternal: false
             };
@@ -796,3 +794,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
