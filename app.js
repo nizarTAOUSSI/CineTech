@@ -105,7 +105,7 @@ function renderAdminFilms() {
     films.forEach(film => {
         tbody.innerHTML += `
          <tr onclick="showMovieDetail('${film.id}')" class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-             <td class="p-3"><img src="${film.poster}" class="w-10 h-14 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" onerror="this.src='https:via.placeholder.com/100x150?text=X'"></td>
+             <td class="p-3"><img src="${film.poster}" class="w-10 h-14 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" onerror="this.src='https://via.placeholder.com/100x150?text=X'"></td>
              <td class="p-3 font-medium text-gray-900">${film.title}</td>
              <td class="p-3 text-gray-500">${film.director}</td>
              <td class="p-3 text-gray-500">${film.year}</td>
@@ -204,6 +204,8 @@ function prepareAddFilm() {
     document.getElementById('film-form').reset();
     document.getElementById('film-id').value = "";
     document.getElementById('film-rating').value = 0;
+    const display = document.getElementById('film-rating-display');
+    if (display) display.innerText = "unrated";
     document.getElementById('film-is-external').value = 'false';
     openFilmModal();
 }
@@ -289,7 +291,7 @@ function renderCatalog() {
         grid.innerHTML += `
          <div onclick="showMovieDetail('${film.id}')" class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer">
              <div class="relative overflow-hidden aspect-[2/3]">
-                 <img src="${film.poster}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https:via.placeholder.com/300x450?text=No+Poster'">
+                 <img src="${film.poster}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                       <p class="text-white text-xs line-clamp-3">${film.overview || ''}</p>
                  </div>
@@ -337,12 +339,12 @@ function renderFavorites() {
     favFilms.forEach(film => {
         tbody.innerHTML += `
          <tr onclick="showMovieDetail('${film.id}')" class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-             <td class="p-3"><img src="${film.poster}" class="w-12 h-16 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" onerror="this.src='https:via.placeholder.com/100x150?text=X'"></td>
+             <td class="p-3"><img src="${film.poster}" class="w-12 h-16 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" onerror="this.src='https://via.placeholder.com/100x150?text=X'"></td>
              <td class="p-3 font-medium text-gray-900">${film.title}</td>
              <td class="p-3 text-gray-600">${film.director}</td>
              <td class="p-3 text-gray-600">${film.year}</td>
              <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full uppercase font-bold">${film.genre}</span></td>
-             <td class="p-3"><span class="font-semibold text-blue-600">★ ${film.rating}</span></td>
+             <td class="p-3"><span class="font-semibold text-blue-600">★ ${getAverageRating(film.id)}</span></td>
              <td class="p-3 text-center" onclick="event.stopPropagation()">
                  <button onclick="toggleFavorite('${film.id}')"
                      class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto"
@@ -365,7 +367,7 @@ function showMovieDetail(id) {
 
     content.innerHTML = `
          <div class="md:w-1/3">
-             <img src="${film.poster}" class="w-full h-full object-cover rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none" onerror="this.src='https:via.placeholder.com/400x600?text=No+Poster'">
+             <img src="${film.poster}" class="w-full h-full object-cover rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none" onerror="this.src='https://via.placeholder.com/400x600?text=No+Poster'">
          </div>
          <div class="md:w-2/3 p-8 flex flex-col justify-center">
              <div class="mb-4">
@@ -634,7 +636,14 @@ function editFilm(id) {
     document.getElementById('film-director').value = film.director;
     document.getElementById('film-year').value = film.year;
     document.getElementById('film-genre').value = film.genre;
-    document.getElementById('film-rating').value = film.rating || 0;
+
+    const avg = getAverageRating(film.id);
+    document.getElementById('film-rating').value = avg;
+    const display = document.getElementById('film-rating-display');
+    if (display) {
+        display.innerText = avg > 0 ? `★ ${avg} / 10` : "unrated";
+    }
+
     document.getElementById('film-poster').value = film.poster.includes('placeholder') ? "" : film.poster;
     document.getElementById('film-is-external').value = film.isExternal ? 'true' : 'false';
 
@@ -919,18 +928,35 @@ function showMessage(text, isError = false) {
 
 window.openLoginModal = openLoginModal;
 
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if (menu) menu.classList.toggle('hidden');
+}
+window.toggleMobileMenu = toggleMobileMenu;
+
+function toggleAdminSidebar() {
+    const sidebar = document.getElementById('admin-sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('-translate-x-full');
+    }
+}
+window.toggleAdminSidebar = toggleAdminSidebar;
+
 function updateUIAuth() {
     const user = JSON.parse(localStorage.getItem('cinetech_currentUser'));
     const authBtns = document.getElementById('auth-buttons');
+    const mobileAuthBtns = document.getElementById('mobile-auth-buttons');
     const userProfile = document.getElementById('user-profile');
-    const adminSidebar = document.getElementById('admin-sidebar');
-    const mainNav = document.getElementById('main-nav');
-    const mainHero = document.getElementById('main-hero');
-    const mainContent = document.querySelector('main');
+
+    const favLink = document.getElementById('nav-favorites');
+    const favMobile = document.getElementById('nav-favorites-mobile');
+    const adminLink = document.getElementById('nav-admin');
+    const adminMobile = document.getElementById('nav-admin-mobile');
 
     if (user) {
-        authBtns.classList.add('hidden');
-        userProfile.classList.remove('hidden');
+        if (authBtns) authBtns.classList.add('hidden');
+        if (mobileAuthBtns) mobileAuthBtns.classList.add('hidden');
+        if (userProfile) userProfile.classList.remove('hidden');
         document.getElementById('nav-username').innerText = user.username;
 
         const avatarColor = user.avatarColor || 'blue';
@@ -944,16 +970,24 @@ function updateUIAuth() {
             roleEl.className = "text-[10px] text-slate-400 font-bold uppercase tracking-wider";
         }
 
-        const favLink = document.getElementById('nav-favorites');
         if (favLink) favLink.classList.remove('hidden');
-
-        const profileLink = document.getElementById('nav-profile');
-        if (profileLink) profileLink.classList.remove('hidden');
+        if (favMobile) favMobile.classList.remove('hidden');
 
         if (user.role === 'admin') {
-            const adminLink = document.getElementById('nav-admin');
             if (adminLink) adminLink.classList.remove('hidden');
+            if (adminMobile) adminMobile.classList.remove('hidden');
+        } else {
+            if (adminLink) adminLink.classList.add('hidden');
+            if (adminMobile) adminMobile.classList.add('hidden');
         }
+    } else {
+        if (authBtns) authBtns.classList.remove('hidden');
+        if (mobileAuthBtns) mobileAuthBtns.classList.remove('hidden');
+        if (userProfile) userProfile.classList.add('hidden');
+        if (favLink) favLink.classList.add('hidden');
+        if (favMobile) favMobile.classList.add('hidden');
+        if (adminLink) adminLink.classList.add('hidden');
+        if (adminMobile) adminMobile.classList.add('hidden');
     }
 }
 
@@ -1004,15 +1038,16 @@ window.navigateTo = function (section) {
     const mainContent = document.querySelector('main');
     const mainNav = document.getElementById('main-nav');
     const adminSidebar = document.getElementById('admin-sidebar');
+    const adminMobileHeader = document.getElementById('admin-mobile-header');
 
     if (section === 'catalog') {
         if (mainHero) mainHero.classList.remove('hidden');
 
         if (user && user.role === 'admin') {
             adminSidebar.classList.add('hidden');
-            adminSidebar.classList.remove('flex');
+            adminMobileHeader.classList.add('hidden');
             mainNav.classList.remove('hidden');
-            mainContent.classList.remove('ml-64');
+            mainContent.classList.remove('lg:ml-64');
             mainContent.classList.add('max-w-7xl', 'mx-auto');
         }
     } else {
@@ -1020,10 +1055,23 @@ window.navigateTo = function (section) {
 
         if (user && user.role === 'admin' && isAdminSection) {
             adminSidebar.classList.remove('hidden');
-            adminSidebar.classList.add('flex');
+            adminMobileHeader.classList.remove('hidden');
             mainNav.classList.add('hidden');
-            mainContent.classList.add('ml-64');
+            // Responsive margin and padding: using Tailwind classes
+            mainContent.classList.add('lg:ml-64', 'pt-20', 'lg:pt-10');
             mainContent.classList.remove('max-w-7xl', 'mx-auto');
+
+            // Ensure sidebar is closed by default on mobile
+            adminSidebar.classList.add('-translate-x-full');
+            // Desktop will force it via lg:translate-x-0 in CSS
+        } else {
+            if (adminSidebar) adminSidebar.classList.add('hidden');
+            if (adminMobileHeader) adminMobileHeader.classList.add('hidden');
+            if (mainNav) mainNav.classList.remove('hidden');
+            if (mainContent) {
+                mainContent.classList.remove('lg:ml-64', 'pt-20', 'lg:pt-10');
+                mainContent.classList.add('max-w-7xl', 'mx-auto');
+            }
         }
     }
 
