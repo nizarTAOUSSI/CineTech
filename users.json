@@ -16,5 +16,17 @@
         "username": "othmane",
         "role": "user",
         "password": "othmane"
-    }
-]
+    },{
+        "id": 34,
+        "username": "nizar",
+        "role": "admin",
+        "password": "nizar"
+    },
+    {
+        "id": 32,
+        "username": "anwar",
+        "role": "admin",
+        "password": "anwar"
+    }]
+
+
