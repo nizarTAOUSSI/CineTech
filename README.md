@@ -6,6 +6,17 @@
 
 ---
 
+## 🌐 Démo en Ligne – Accès Direct à l’Application
+
+Vous pouvez consulter et tester l’application CineTech directement en ligne via le lien suivant :
+
+👉 https://rococo-choux-30430d.netlify.app/# 
+
+Ce lien permet d’accéder à la version déployée de l’application sans aucune installation.
+Il est idéal pour la démonstration, la correction et l’évaluation du projet.
+
+---
+
 ## 👥 Membres du Groupe 8
 Ce projet a été réalisé par :
 * **NIZAR TAOUSSI**
