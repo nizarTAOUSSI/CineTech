@@ -1057,13 +1057,10 @@ window.navigateTo = function (section) {
             adminSidebar.classList.remove('hidden');
             adminMobileHeader.classList.remove('hidden');
             mainNav.classList.add('hidden');
-            // Responsive margin and padding: using Tailwind classes
             mainContent.classList.add('lg:ml-64', 'pt-20', 'lg:pt-10');
             mainContent.classList.remove('max-w-7xl', 'mx-auto');
 
-            // Ensure sidebar is closed by default on mobile
             adminSidebar.classList.add('-translate-x-full');
-            // Desktop will force it via lg:translate-x-0 in CSS
         } else {
             if (adminSidebar) adminSidebar.classList.add('hidden');
             if (adminMobileHeader) adminMobileHeader.classList.add('hidden');
